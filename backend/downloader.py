@@ -14,6 +14,10 @@ def analyze_video(url: str):
         'extract_flat': False,
         'extractor_args': {'youtube': {'player_client': ['android']}}
     }
+    
+    cookies_path = os.path.join(os.path.dirname(__file__), "cookies.txt")
+    if os.path.exists(cookies_path):
+        ydl_opts['cookiefile'] = cookies_path
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         try:
             info = ydl.extract_info(url, download=False)
@@ -103,6 +107,10 @@ def download_video_sync(url: str, format_id: str, download_id: str, progress_hoo
         'extractor_args': {'youtube': {'player_client': ['android']}}, # Bypass bot protection
         'progress_hooks': progress_hooks
     }
+    
+    cookies_path = os.path.join(os.path.dirname(__file__), "cookies.txt")
+    if os.path.exists(cookies_path):
+        ydl_opts['cookiefile'] = cookies_path
     
     if format_id == 'bestaudio':
         ydl_opts['postprocessors'] = [{

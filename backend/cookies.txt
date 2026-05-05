@@ -1,0 +1,14 @@
+# Netscape HTTP Cookie File
+# https://curl.haxx.se/rfc/cookie_spec.html
+# This is a generated file! Do not edit.
+
+.youtube.com	TRUE	/	TRUE	1812551392	PREF	f4=4000000&f6=40000000&tz=Asia.Calcutta&f7=100
+.youtube.com	TRUE	/	TRUE	1791178184	__Secure-BUCKET	CIAG
+.youtube.com	TRUE	/	TRUE	1807513698	__Secure-1PSIDTS	sidts-CjQBWhotCdYDHak7kb5g1IxdUZuX5jSwtUlExZzw8UbLEzcfP1sn6yMIj9bmyVjJQTRxnU9xEAA
+.youtube.com	TRUE	/	TRUE	1807513698	__Secure-3PSIDTS	sidts-CjQBWhotCdYDHak7kb5g1IxdUZuX5jSwtUlExZzw8UbLEzcfP1sn6yMIj9bmyVjJQTRxnU9xEAA
+.youtube.com	TRUE	/	TRUE	1777993189	GPS	1
+.youtube.com	TRUE	/	TRUE	1793543389	VISITOR_INFO1_LIVE	-nwENjQYd6w
+.youtube.com	TRUE	/	TRUE	1793543389	VISITOR_PRIVACY_METADATA	CgJJThIEGgAgYA%3D%3D
+.youtube.com	TRUE	/	TRUE	1793505105	__Secure-YNID	18.YT=DvWkiuM-3WSJ5p03Pyfvz1qDziYm2RXHQrVRDL60_NatQekQ_2UCTFaXBbVr-po_vYAN2rlbQPDuavrJ3ygqbg83rShYp2TD_WMuNpZcw61SIDJMQ-jk-AlU-A3qtS_UJmy6TYmVNmb9XVajp5-dv0zYFGTcW2yXWiYxCNJQvsP689EftF1tQeA9T96VsqJWR8BjCVC9gozEm9PuEu8xCUM4AXXUmKyROuxvtxJI7SKnjcXjLkUkMl746HPRggpY3kZWOoNoxaUcVZKo8Xk3h-8HFMX6HSCOv43FKEPFR4pBOrptys-9pyjcerPRxsdlvZMaGwh6PIWwX14z3LEUDQ
+.youtube.com	TRUE	/	TRUE	1793505105	__Secure-ROLLOUT_TOKEN	CNag3vPU9bqAJBCY7Pab3f2RAxiL1P25n6GUAw%3D%3D
+.youtube.com	TRUE	/	TRUE	0	YSC	6301_iZOw3U
