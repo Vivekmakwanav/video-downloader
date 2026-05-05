@@ -12,7 +12,7 @@ def analyze_video(url: str):
         'no_warnings': True,
         'skip_download': True,
         'extract_flat': False,
-        'extractor_args': {'youtube': ['player_client=android']}
+        'extractor_args': {'youtube': {'player_client': ['android']}}
     }
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         try:
@@ -100,7 +100,7 @@ def download_video_sync(url: str, format_id: str, download_id: str, progress_hoo
         'merge_output_format': 'mp4',
         'quiet': True,
         'no_warnings': True,
-        'extractor_args': {'youtube': ['player_client=android']}, # Bypass bot protection
+        'extractor_args': {'youtube': {'player_client': ['android']}}, # Bypass bot protection
         'progress_hooks': progress_hooks
     }
     
