@@ -26,8 +26,8 @@ allowed_origins = os.getenv("ALLOWED_ORIGINS", "*").split(",")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins, # For production, restrict this via environment variable
-    allow_credentials=True,
+    allow_origins=["*"], # Allow all origins for Vercel deployment
+    allow_credentials=False, # Must be false when origins is *
     allow_methods=["*"],
     allow_headers=["*"],
 )

@@ -11,7 +11,8 @@ def analyze_video(url: str):
         'quiet': True,
         'no_warnings': True,
         'skip_download': True,
-        'extract_flat': False
+        'extract_flat': False,
+        'extractor_args': {'youtube': ['player_client=android']}
     }
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         try:
@@ -89,12 +90,18 @@ def analyze_video(url: str):
 
 def download_video_sync(url: str, format_id: str, download_id: str, progress_hooks=None):
     file_path = os.path.join(DOWNLOAD_DIR, f"{download_id}.%(ext)s")
+    
+    # Determine the format string correctly depending on if it's audio only
+    download_format = 'bestaudio/best' if format_id == 'bestaudio' else f'{format_id}+bestaudio/best'
+    
     ydl_opts = {
-        'format': format_id,
+        'format': download_format,
         'outtmpl': file_path,
+        'merge_output_format': 'mp4',
         'quiet': True,
         'no_warnings': True,
-        'merge_output_format': 'mp4',
+        'extractor_args': {'youtube': ['player_client=android']}, # Bypass bot protection
+        'progress_hooks': progress_hooks
     }
     
     if format_id == 'bestaudio':
