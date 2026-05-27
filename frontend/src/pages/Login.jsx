@@ -32,8 +32,8 @@ export default function Login() {
   };
 
   return (
-    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div className="glass-panel animate-slide-up" style={{ padding: '40px', width: '100%', maxWidth: '400px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 16px' }} className="container">
+      <div className="glass-panel animate-slide-up login-card">
         <div style={{ textAlign: 'center' }}>
           <h2 style={{ fontSize: '2rem', fontWeight: '700', marginBottom: '8px' }}>
             {isLogin ? 'Welcome Back' : 'Create Account'}

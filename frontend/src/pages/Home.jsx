@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Loader2, Video, Music, HardDrive, Clock, AlertCircle, CheckCircle, Play } from 'lucide-react';
+import { Search, Loader2, Video, Music, HardDrive, Clock, AlertCircle, CheckCircle, Play, Link, Sliders, Download, ChevronDown, ChevronUp } from 'lucide-react';
 import { useDownload } from '../hooks/useDownload';
 
 export default function Home() {
@@ -8,6 +8,11 @@ export default function Home() {
   const [videoData, setVideoData] = useState(null);
   const [error, setError] = useState('');
   const [isPlaying, setIsPlaying] = useState(false);
+  const [openFaq, setOpenFaq] = useState(null);
+  
+  const toggleFaq = (index) => {
+    setOpenFaq(openFaq === index ? null : index);
+  };
   
   // Custom hook for managing WebSocket connection and download states
   const { downloads, startDownload } = useDownload();
@@ -66,19 +71,19 @@ export default function Home() {
   };
 
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%', maxWidth: '800px', margin: '0 auto', gap: '40px' }}>
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%', maxWidth: '800px', margin: '0 auto', gap: '40px' }} className="container">
       
       {/* Hero Section */}
       <div style={{ textAlign: 'center', width: '100%' }} className="animate-slide-up">
-        <h1 style={{ fontSize: '3.5rem', fontWeight: '800', marginBottom: '16px', lineHeight: '1.1' }}>
+        <h1 className="hero-title">
           Universal <span className="text-gradient">Video Downloader</span>
         </h1>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '1.2rem', marginBottom: '32px' }}>
+        <p className="hero-subtitle">
           Extract high-quality media from YouTube, Instagram, X, and more.
         </p>
         
-        <form onSubmit={handleAnalyze} style={{ display: 'flex', gap: '16px', width: '100%' }}>
-          <div style={{ flex: 1, position: 'relative' }}>
+        <form onSubmit={handleAnalyze} className="search-form">
+          <div className="search-input-wrapper">
             <Search size={20} style={{ position: 'absolute', left: '20px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
             <input 
               type="text" 
@@ -104,7 +109,7 @@ export default function Home() {
 
       {/* Video Preview Card */}
       {videoData && (
-        <div className="glass-panel animate-slide-up" style={{ width: '100%', padding: '24px', animationDelay: '0.1s' }}>
+        <div className="glass-panel animate-slide-up preview-card" style={{ width: '100%', padding: '24px', animationDelay: '0.1s' }}>
           <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
             {/* Thumbnail / Player */}
             <div style={{ flex: '1 1 300px', borderRadius: '12px', overflow: 'hidden', position: 'relative', minHeight: '200px', background: '#111' }}>
@@ -156,7 +161,7 @@ export default function Home() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: 'auto' }}>
                 <h3 style={{ fontSize: '1rem', color: 'var(--text-secondary)', fontWeight: '500' }}>Available Formats</h3>
                 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '250px', overflowY: 'auto', paddingRight: '8px' }}>
+                <div className="format-list">
                   {videoData.formats.map((format, idx) => {
                     const downloadId = activeFormatDownloads[format.format_id];
                     const downloadState = downloadId ? downloads[downloadId] : null;
@@ -167,8 +172,8 @@ export default function Home() {
                     
                     return (
                       <div key={idx} className="glass-panel" style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '12px', background: 'rgba(255,255,255,0.02)', transition: 'background 0.2s' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <div className="format-item">
+                          <div className="format-item-left">
                             {format.ext === 'mp4' || format.ext === 'webm' ? <Video size={18} color="var(--accent-blue)" /> : <Music size={18} color="var(--accent-purple)" />}
                             <div>
                               <div style={{ fontWeight: '600', display: 'flex', gap: '8px', alignItems: 'center' }}>
@@ -179,7 +184,7 @@ export default function Home() {
                             </div>
                           </div>
                           
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                          <div className="format-item-right">
                             <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                               <HardDrive size={14} /> {formatSize(format.filesize)}
                             </span>
@@ -219,6 +224,143 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      {/* How It Works Section */}
+      <div style={{ width: '100%', marginTop: '40px', display: 'flex', flexDirection: 'column', gap: '32px' }} className="animate-slide-up">
+        <div style={{ textAlign: 'center' }}>
+          <h2 style={{ fontSize: '2.2rem', fontWeight: '800', marginBottom: '12px' }}>
+            How It <span className="text-gradient">Works</span>
+          </h2>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '1.05rem' }}>
+            Download and archive high-quality video or audio in three simple steps.
+          </p>
+        </div>
+        
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '24px' }}>
+          <div className="glass-panel" style={{ padding: '32px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '16px', transition: 'transform 0.3s ease' }} onMouseOver={e => e.currentTarget.style.transform = 'translateY(-5px)'} onMouseOut={e => e.currentTarget.style.transform = 'translateY(0)'}>
+            <div style={{ padding: '16px', background: 'rgba(0, 240, 255, 0.05)', borderRadius: '16px', color: 'var(--accent-blue)' }}>
+              <Link size={24} />
+            </div>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: '700' }}>1. Paste Video URL</h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.5' }}>
+              Copy the video link from YouTube, Instagram, or Twitter and paste it into the analyzer box above.
+            </p>
+          </div>
+          
+          <div className="glass-panel" style={{ padding: '32px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '16px', transition: 'transform 0.3s ease' }} onMouseOver={e => e.currentTarget.style.transform = 'translateY(-5px)'} onMouseOut={e => e.currentTarget.style.transform = 'translateY(0)'}>
+            <div style={{ padding: '16px', background: 'rgba(138, 43, 226, 0.05)', borderRadius: '16px', color: 'var(--accent-purple)' }}>
+              <Sliders size={24} />
+            </div>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: '700' }}>2. Choose Format</h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.5' }}>
+              Nexus will extract high-resolution formats and audio-only streams instantly for your selection.
+            </p>
+          </div>
+          
+          <div className="glass-panel" style={{ padding: '32px 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: '16px', transition: 'transform 0.3s ease' }} onMouseOver={e => e.currentTarget.style.transform = 'translateY(-5px)'} onMouseOut={e => e.currentTarget.style.transform = 'translateY(0)'}>
+            <div style={{ padding: '16px', background: 'rgba(32, 201, 151, 0.05)', borderRadius: '16px', color: '#20c997' }}>
+              <Download size={24} />
+            </div>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: '700' }}>3. Download File</h3>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.5' }}>
+              Click download! Our backend merges separate audio and video tracks on the fly using high-performance engines.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Supported Platforms Section */}
+      <div style={{ width: '100%', marginTop: '40px', display: 'flex', flexDirection: 'column', gap: '32px' }} className="animate-slide-up">
+        <div style={{ textAlign: 'center' }}>
+          <h2 style={{ fontSize: '2.2rem', fontWeight: '800', marginBottom: '12px' }}>
+            Supported <span className="text-gradient">Platforms</span>
+          </h2>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '1.05rem' }}>
+            Archive videos from your favorite media sharing platforms.
+          </p>
+        </div>
+        
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '16px', width: '100%' }}>
+          {[
+            { name: 'YouTube', color: '#ff0000', bg: 'rgba(255, 0, 0, 0.05)' },
+            { name: 'Instagram', color: '#e1306c', bg: 'rgba(225, 48, 108, 0.05)' },
+            { name: 'X / Twitter', color: '#ffffff', bg: 'rgba(255, 255, 255, 0.05)' },
+            { name: 'TikTok', color: '#00f2fe', bg: 'rgba(0, 242, 254, 0.05)' },
+            { name: 'Facebook', color: '#1877f2', bg: 'rgba(24, 119, 242, 0.05)' },
+            { name: 'Vimeo', color: '#1ab7ea', bg: 'rgba(26, 183, 234, 0.05)' },
+            { name: 'Twitch', color: '#9146ff', bg: 'rgba(145, 70, 255, 0.05)' },
+            { name: 'SoundCloud', color: '#ff5500', bg: 'rgba(255, 85, 0, 0.05)' }
+          ].map((platform, i) => (
+            <div 
+              key={i} 
+              className="glass-panel" 
+              style={{ 
+                padding: '16px', 
+                display: 'flex', 
+                flexDirection: 'column', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                gap: '8px', 
+                cursor: 'pointer', 
+                transition: 'all 0.3s ease'
+              }}
+              onMouseOver={e => {
+                e.currentTarget.style.background = platform.bg;
+                e.currentTarget.style.borderColor = platform.color + '44';
+                e.currentTarget.style.boxShadow = `0 0 15px ${platform.color}11`;
+              }}
+              onMouseOut={e => {
+                e.currentTarget.style.background = 'var(--glass-bg)';
+                e.currentTarget.style.borderColor = 'var(--glass-border)';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
+            >
+              <span style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--text-primary)' }}>{platform.name}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* FAQ Accordion Section */}
+      <div className="faq-section animate-slide-up">
+        <div style={{ textAlign: 'center' }}>
+          <h2 className="faq-title">
+            Frequently Asked <span className="text-gradient">Questions</span>
+          </h2>
+          <p className="faq-subtitle">
+            Got questions? We've got answers.
+          </p>
+        </div>
+        
+        {[
+          {
+            q: "Which platforms are supported?",
+            a: "Nexus supports downloads from YouTube, Instagram, X (Twitter), Facebook, TikTok, Vimeo, Twitch, SoundCloud, and many other media sharing websites."
+          },
+          {
+            q: "Can I download 1080p and 4K videos with audio?",
+            a: "Yes! For formats where YouTube separates high-resolution video and audio streams, our Python backend merges them on the fly using high-performance merger libraries before delivery."
+          },
+          {
+            q: "Is Nexus completely free to use?",
+            a: "Absolutely. Nexus is 100% free and free from disruptive advertisements. It was created to provide a clean, modern interface for archiving personal digital media."
+          },
+          {
+            q: "Where are the downloaded files saved?",
+            a: "Downloads are stored securely in the configured downloads directory on the server hosting the app. Registered users can view and track their historical downloads directly inside the Dashboard."
+          }
+        ].map((faq, i) => (
+          <div key={i} className="glass-panel faq-item">
+            <button className="faq-question" onClick={() => toggleFaq(i)}>
+              <span>{faq.q}</span>
+              {openFaq === i ? <ChevronUp size={18} color="var(--accent-blue)" /> : <ChevronDown size={18} color="var(--text-secondary)" />}
+            </button>
+            <div className={`faq-answer ${openFaq === i ? 'open' : ''}`}>
+              <p>{faq.a}</p>
+            </div>
+          </div>
+        ))}
+      </div>
       
     </div>
   );

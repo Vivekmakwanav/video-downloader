@@ -12,7 +12,7 @@ def analyze_video(url: str):
         'no_warnings': True,
         'skip_download': True,
         'extract_flat': False,
-        'extractor_args': {'youtube': {'player_client': ['android']}}
+        'remote_components': ['ejs:github']
     }
     
     cookies_path = os.path.join(os.path.dirname(__file__), "cookies.txt")
@@ -25,7 +25,7 @@ def analyze_video(url: str):
             # Extract basic info
             title = info.get('title', 'Unknown Title')
             thumbnail = info.get('thumbnail', '')
-            duration = info.get('duration', 0)
+            duration = int(round(info.get('duration') or 0))
             extractor = info.get('extractor_key', 'Unknown')
             video_id = info.get('id', '')
             
@@ -44,11 +44,16 @@ def analyze_video(url: str):
             )
             
             for f in video_formats:
-                height = f.get('height')
-                if not height or height not in [2160, 1440, 1080, 720, 480, 360]:
+                w = f.get('width') or 0
+                h = f.get('height') or 0
+                # Use the smaller dimension to determine standard resolution (e.g. 1080p, 720p)
+                # This ensures support for both horizontal and vertical/portrait (shorts/reels) video formats.
+                resolution_val = min(w, h) if w and h else h
+                
+                if not resolution_val or resolution_val not in [2160, 1440, 1080, 720, 480, 360]:
                     continue
                 
-                res_label = f"{height}p"
+                res_label = f"{resolution_val}p"
                 if res_label in seen_resolutions:
                     continue
                 seen_resolutions.add(res_label)
@@ -67,7 +72,7 @@ def analyze_video(url: str):
                     'ext': 'mp4',
                     'resolution': res_label,
                     'filesize': filesize,
-                    'format_note': f.get('format_note', 'HD' if height >= 720 else 'SD')
+                    'format_note': f.get('format_note', 'HD' if resolution_val >= 720 else 'SD')
                 })
                 
             # Add audio only option
@@ -104,8 +109,8 @@ def download_video_sync(url: str, format_id: str, download_id: str, progress_hoo
         'merge_output_format': 'mp4',
         'quiet': True,
         'no_warnings': True,
-        'extractor_args': {'youtube': {'player_client': ['android']}}, # Bypass bot protection
-        'progress_hooks': progress_hooks
+        'progress_hooks': progress_hooks,
+        'remote_components': ['ejs:github']
     }
     
     cookies_path = os.path.join(os.path.dirname(__file__), "cookies.txt")

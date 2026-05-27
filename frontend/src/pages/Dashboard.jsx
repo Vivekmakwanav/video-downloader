@@ -38,8 +38,8 @@ export default function Dashboard() {
   }, [token]);
 
   return (
-    <div style={{ flex: 1, width: '100%', maxWidth: '1000px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '32px' }}>
-      <div className="glass-panel animate-slide-up" style={{ padding: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <div style={{ flex: 1, width: '100%', maxWidth: '1000px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '32px' }} className="container">
+      <div className="glass-panel animate-slide-up dashboard-header-panel">
         <div>
           <h1 style={{ fontSize: '2rem', fontWeight: '800', marginBottom: '8px' }}>Dashboard</h1>
           <p style={{ color: 'var(--text-secondary)' }}>Welcome back, <span style={{ color: 'var(--text-primary)', fontWeight: '600' }}>{user.email}</span></p>
@@ -49,7 +49,7 @@ export default function Dashboard() {
         </button>
       </div>
 
-      <div className="glass-panel animate-slide-up" style={{ padding: '32px', animationDelay: '0.1s' }}>
+      <div className="glass-panel animate-slide-up dashboard-history-panel" style={{ animationDelay: '0.1s' }}>
         <h2 style={{ fontSize: '1.5rem', fontWeight: '700', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
           <Clock color="var(--accent-blue)" /> Download History
         </h2>
@@ -69,10 +69,10 @@ export default function Dashboard() {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {history.map((item) => (
-              <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                  <h4 style={{ fontWeight: '600', fontSize: '1.1rem' }}>{item.title}</h4>
-                  <div style={{ display: 'flex', gap: '16px', color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
+              <div key={item.id} className="history-item">
+                <div className="history-item-details">
+                  <h4 style={{ fontWeight: '600', fontSize: '1.1rem', wordBreak: 'break-word' }}>{item.title}</h4>
+                  <div className="history-item-meta">
                     <span>Platform: {item.platform}</span>
                     <span>Format: {item.format_id}</span>
                     <span>Date: {new Date(item.downloaded_at).toLocaleDateString()}</span>
@@ -85,7 +85,9 @@ export default function Dashboard() {
                     fontSize: '0.8rem', 
                     fontWeight: '600',
                     background: item.status === 'completed' || item.status === 'finished' ? 'rgba(32, 201, 151, 0.1)' : 'rgba(255, 255, 255, 0.1)',
-                    color: item.status === 'completed' || item.status === 'finished' ? '#20c997' : 'var(--text-secondary)'
+                    color: item.status === 'completed' || item.status === 'finished' ? '#20c997' : 'var(--text-secondary)',
+                    display: 'inline-block',
+                    whiteSpace: 'nowrap'
                   }}>
                     {item.status.toUpperCase()}
                   </span>
