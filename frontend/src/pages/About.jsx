@@ -14,10 +14,10 @@ export default function About() {
       
       <div className="about-header">
         <h1 className="hero-title" style={{ marginBottom: '24px' }}>
-          About <span className="text-gradient">Nexus</span>
+          About <span className="text-gradient">Visnexa</span>
         </h1>
         <p style={{ color: 'var(--text-secondary)', fontSize: '1.15rem', maxWidth: '600px', margin: '0 auto', lineHeight: '1.6' }}>
-          We built Nexus Video Downloader to provide a clean, modern, and ad-free experience for archiving your favorite media across the internet. 
+          We built Visnexa Video Downloader to provide a clean, modern, and ad-free experience for archiving your favorite media across the internet. 
         </p>
       </div>
 

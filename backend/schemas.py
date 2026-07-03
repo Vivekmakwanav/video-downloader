@@ -45,6 +45,11 @@ class VideoFormat(BaseModel):
     filesize: Optional[int]
     format_note: Optional[str]
 
+class SubtitleLanguage(BaseModel):
+    lang: str
+    name: str
+    is_auto: bool
+
 class VideoAnalysisResponse(BaseModel):
     url: str
     title: str
@@ -53,3 +58,12 @@ class VideoAnalysisResponse(BaseModel):
     platform: str
     video_id: str
     formats: List[VideoFormat]
+    subtitles: List[SubtitleLanguage] = []
+
+class SubtitleDownloadRequest(BaseModel):
+    url: str
+    lang: str
+    is_auto: bool
+
+class BatchAnalysisRequest(BaseModel):
+    urls: List[str]

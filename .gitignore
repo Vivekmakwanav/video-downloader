@@ -2,3 +2,6 @@ __pycache__/
 *.pyc
 .env
 node_modules/
+downloads/
+backend/test_download.mkv
+backend/test_yt_download.py

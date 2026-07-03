@@ -43,7 +43,7 @@ export function useDownload() {
     };
   }, []);
 
-  const startDownload = async (url, formatId) => {
+  const startDownload = async (url, formatId, startTime = null, endTime = null) => {
     try {
       const token = localStorage.getItem('token');
       const headers = { 'Content-Type': 'application/json' };
@@ -58,7 +58,9 @@ export function useDownload() {
         body: JSON.stringify({ 
           url, 
           format_id: formatId,
-          client_id: clientId.current
+          client_id: clientId.current,
+          start_time: startTime,
+          end_time: endTime
         })
       });
       

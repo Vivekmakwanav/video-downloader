@@ -11,11 +11,12 @@ import socket
 import ipaddress
 from collections import defaultdict
 from urllib.parse import urlparse
+from typing import Optional
 
 from database import engine, Base, get_db
 import models
 import schemas
-from downloader import analyze_video, download_video_sync
+from downloader import analyze_video, download_video_sync, download_subtitles_sync
 from socket_manager import manager
 from auth import get_password_hash, verify_password, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES, SECRET_KEY, ALGORITHM
 from datetime import timedelta
@@ -165,11 +166,75 @@ async def analyze(request: Request, analysis_request: schemas.VideoAnalysisReque
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+@app.post("/api/analyze/batch", response_model=list[schemas.VideoAnalysisResponse])
+async def analyze_batch(request: Request, batch_request: schemas.BatchAnalysisRequest):
+    if not analyze_limiter.is_allowed(request.client.host):
+        raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail="Too many requests. Please try again later.")
+    
+    # Restrict to max 5 URLs
+    urls = batch_request.urls[:5]
+    safe_urls = [url for url in urls if is_safe_url(url)]
+    if not safe_urls:
+        raise HTTPException(status_code=400, detail="No valid/safe URLs provided.")
+        
+    async def safe_analyze(url: str):
+        try:
+            return await asyncio.to_thread(analyze_video, url)
+        except Exception as e:
+            return {
+                'url': url,
+                'title': f"Error: Failed to analyze video ({str(e)})",
+                'thumbnail': '',
+                'duration': 0,
+                'platform': 'Unknown',
+                'video_id': '',
+                'formats': [],
+                'subtitles': []
+            }
+            
+    results = await asyncio.gather(*(safe_analyze(url) for url in safe_urls))
+    return results
+
+@app.post("/api/subtitles/download")
+async def start_subtitle_download(request: Request, sub_request: schemas.SubtitleDownloadRequest, background_tasks: BackgroundTasks):
+    if not download_limiter.is_allowed(request.client.host):
+        raise HTTPException(status_code=status.HTTP_429_TOO_MANY_REQUESTS, detail="Too many requests. Please try again later.")
+    if not is_safe_url(sub_request.url):
+        raise HTTPException(status_code=400, detail="URL is invalid or references an unsafe destination.")
+        
+    download_id = str(uuid.uuid4().int)[:10]
+    try:
+        file_path = await asyncio.to_thread(
+            download_subtitles_sync,
+            sub_request.url,
+            sub_request.lang,
+            sub_request.is_auto,
+            download_id
+        )
+        
+        if not os.path.exists(file_path):
+            raise HTTPException(status_code=404, detail="Subtitle file not found.")
+            
+        def remove_file(path: str):
+            try:
+                os.remove(path)
+            except Exception:
+                pass
+                
+        background_tasks.add_task(remove_file, file_path)
+        
+        download_name = f"subtitles_{sub_request.lang}.srt"
+        return FileResponse(path=file_path, filename=download_name, media_type='text/srt')
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 class DownloadRequest(schemas.VideoAnalysisRequest):
     format_id: str
     client_id: str
+    start_time: Optional[int] = None
+    end_time: Optional[int] = None
 
-async def download_task(url: str, format_id: str, download_id: str, client_id: str):
+async def download_task(url: str, format_id: str, download_id: str, client_id: str, start_time: Optional[int] = None, end_time: Optional[int] = None):
     loop = asyncio.get_running_loop()
 
     def progress_hook(d):
@@ -195,7 +260,15 @@ async def download_task(url: str, format_id: str, download_id: str, client_id: s
                 pass
 
     try:
-        file_path = await asyncio.to_thread(download_video_sync, url, format_id, download_id, progress_hooks=[progress_hook])
+        file_path = await asyncio.to_thread(
+            download_video_sync, 
+            url, 
+            format_id, 
+            download_id, 
+            progress_hooks=[progress_hook],
+            start_time=start_time,
+            end_time=end_time
+        )
         
         # Update database status to completed and save file_path
         from database import SessionLocal
@@ -310,7 +383,9 @@ async def start_download(request: Request, download_request: DownloadRequest, ba
         url=download_request.url, 
         format_id=download_request.format_id, 
         download_id=str(db_download.id), 
-        client_id=download_request.client_id
+        client_id=download_request.client_id,
+        start_time=download_request.start_time,
+        end_time=download_request.end_time
     )
 
     return {"message": "Download started", "download_id": db_download.id}

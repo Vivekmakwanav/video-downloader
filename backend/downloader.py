@@ -85,6 +85,26 @@ def analyze_video(url: str):
                     'format_note': 'High Quality Audio'
                 })
             
+            # Extract subtitles list
+            subtitles_list = []
+            raw_subs = info.get('subtitles', {}) or {}
+            raw_auto = info.get('automatic_captions', {}) or {}
+            
+            for lang, val in raw_subs.items():
+                if val:
+                    subtitles_list.append({
+                        'lang': lang,
+                        'name': val[0].get('name', lang),
+                        'is_auto': False
+                    })
+            for lang, val in raw_auto.items():
+                if val:
+                    subtitles_list.append({
+                        'lang': lang,
+                        'name': val[0].get('name', lang),
+                        'is_auto': True
+                    })
+
             return {
                 'url': url,
                 'title': title,
@@ -92,12 +112,13 @@ def analyze_video(url: str):
                 'duration': duration,
                 'platform': extractor,
                 'video_id': video_id,
-                'formats': formats
+                'formats': formats,
+                'subtitles': subtitles_list
             }
         except yt_dlp.utils.DownloadError as e:
             raise Exception(f"Failed to analyze video: {str(e)}")
 
-def download_video_sync(url: str, format_id: str, download_id: str, progress_hooks=None):
+def download_video_sync(url: str, format_id: str, download_id: str, progress_hooks=None, start_time: int = None, end_time: int = None):
     file_path = os.path.join(DOWNLOAD_DIR, f"{download_id}.%(ext)s")
     
     # Determine the format string correctly depending on if it's audio only
@@ -124,9 +145,53 @@ def download_video_sync(url: str, format_id: str, download_id: str, progress_hoo
             'preferredquality': '192',
         }]
 
+    if start_time is not None and end_time is not None:
+        ydl_opts['download_ranges'] = lambda info_dict, self: [{
+            'start_time': start_time,
+            'end_time': end_time,
+            'title': 'Trimmed Section'
+        }]
+        ydl_opts['force_keyframes_at_cuts'] = True
+
     if progress_hooks:
         ydl_opts['progress_hooks'] = progress_hooks
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=True)
         return ydl.prepare_filename(info)
+
+def download_subtitles_sync(url: str, lang: str, is_auto: bool, download_id: str):
+    file_path = os.path.join(DOWNLOAD_DIR, f"{download_id}")
+    
+    ydl_opts = {
+        'skip_download': True,
+        'writesubtitles': not is_auto,
+        'writeautomaticsub': is_auto,
+        'subtitleslangs': [lang],
+        'outtmpl': file_path,
+        'quiet': True,
+        'no_warnings': True,
+        'convertsubtitles': 'srt',
+        'remote_components': ['ejs:github']
+    }
+    
+    cookies_path = os.path.join(os.path.dirname(__file__), "cookies.txt")
+    if os.path.exists(cookies_path):
+        ydl_opts['cookiefile'] = cookies_path
+        
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        info = ydl.extract_info(url, download=True)
+        expected_path = f"{file_path}.{lang}.srt"
+        final_path = f"{file_path}.srt"
+        
+        if os.path.exists(expected_path):
+            os.rename(expected_path, final_path)
+            return final_path
+            
+        for f in os.listdir(DOWNLOAD_DIR):
+            if f.startswith(download_id) and f != download_id:
+                curr_path = os.path.join(DOWNLOAD_DIR, f)
+                os.rename(curr_path, final_path)
+                return final_path
+                
+        raise Exception("Subtitle download failed or files not found.")
