@@ -560,10 +560,10 @@ export default function Home() {
               <Scissors size={16} color="var(--accent-blue)" /> Download Chrome Extension Helper
             </h4>
             <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-              Add a quick "Download with Visnexa" button directly below YouTube videos!
+              Add a quick "Download with Vidnexa" button directly below YouTube videos!
             </p>
           </div>
-          <a href="/visnexa-extension.zip" download className="neon-button" style={{ 
+          <a href="/vidnexa-extension.zip" download className="neon-button" style={{ 
             fontSize: '0.85rem', 
             padding: '8px 16px', 
             borderRadius: '20px', 
@@ -621,7 +621,7 @@ export default function Home() {
             </div>
             <h3 style={{ fontSize: '1.25rem', fontWeight: '700' }}>2. Choose Format</h3>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.5' }}>
-              Visnexa will extract high-resolution formats and audio-only streams instantly for your selection.
+              Vidnexa will extract high-resolution formats and audio-only streams instantly for your selection.
             </p>
           </div>
           
@@ -703,15 +703,15 @@ export default function Home() {
         {[
           {
             q: "Which platforms are supported?",
-            a: "Visnexa supports downloads from YouTube, Instagram, X (Twitter), Facebook, TikTok, Vimeo, Twitch, SoundCloud, and many other media sharing websites."
+            a: "Vidnexa supports downloads from YouTube, Instagram, X (Twitter), Facebook, TikTok, Vimeo, Twitch, SoundCloud, and many other media sharing websites."
           },
           {
             q: "Can I download 1080p and 4K videos with audio?",
             a: "Yes! For formats where YouTube separates high-resolution video and audio streams, our Python backend merges them on the fly using high-performance merger libraries before delivery."
           },
           {
-            q: "Is Visnexa completely free to use?",
-            a: "Absolutely. Visnexa is 100% free and free from disruptive advertisements. It was created to provide a clean, modern interface for archiving personal digital media."
+            q: "Is Vidnexa completely free to use?",
+            a: "Absolutely. Vidnexa is 100% free and free from disruptive advertisements. It was created to provide a clean, modern interface for archiving personal digital media."
           },
           {
             q: "Where are the downloaded files saved?",

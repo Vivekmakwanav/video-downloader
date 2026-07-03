@@ -34,7 +34,7 @@ export default function Footer() {
             <div style={{ background: 'linear-gradient(135deg, var(--accent-blue), var(--accent-purple))', padding: '8px', borderRadius: '12px', display: 'flex' }}>
               <DownloadCloud color="white" size={20} />
             </div>
-            <span className="text-gradient" style={{ fontSize: '1.3rem', fontWeight: '700', letterSpacing: '-0.5px' }}>VISNEXA</span>
+            <span className="text-gradient" style={{ fontSize: '1.3rem', fontWeight: '700', letterSpacing: '-0.5px' }}>VIDNEXA</span>
           </div>
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: '1.6', margin: '8px 0' }}>
             A premium, ad-free universal media downloader utility designed to archive digital media securely and efficiently.
@@ -50,7 +50,7 @@ export default function Footer() {
                 <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
               </svg>
             </a>
-            <a href="mailto:support@visnexa.app" style={{ color: 'var(--text-secondary)', transition: 'color 0.2s', display: 'flex', alignItems: 'center' }} onMouseOver={e => e.currentTarget.style.color = 'var(--accent-blue)'} onMouseOut={e => e.currentTarget.style.color = 'var(--text-secondary)'} aria-label="Email">
+            <a href="mailto:support@vidnexa.app" style={{ color: 'var(--text-secondary)', transition: 'color 0.2s', display: 'flex', alignItems: 'center' }} onMouseOver={e => e.currentTarget.style.color = 'var(--accent-blue)'} onMouseOut={e => e.currentTarget.style.color = 'var(--text-secondary)'} aria-label="Email">
               <Mail size={20} />
             </a>
           </div>
@@ -74,7 +74,7 @@ export default function Footer() {
             <li><Link to="/about">Technology</Link></li>
             <li><a href="#faq">FAQ</a></li>
             <li><a href="https://github.com" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>Documentation <ExternalLink size={12} /></a></li>
-            <li><a href="mailto:support@visnexa.app">Contact Us</a></li>
+            <li><a href="mailto:support@vidnexa.app">Contact Us</a></li>
           </ul>
         </div>
 
@@ -116,11 +116,11 @@ export default function Footer() {
         gap: '16px' 
       }} className="footer-bottom">
         <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-          &copy; {new Date().getFullYear()} Visnexa Downloader. All rights reserved.
+          &copy; {new Date().getFullYear()} Vidnexa Downloader. All rights reserved.
         </div>
         
         <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-          Made with <Heart size={14} color="var(--accent-purple)" fill="var(--accent-purple)" style={{ display: 'inline' }} /> by Visnexa Team
+          Made with <Heart size={14} color="var(--accent-purple)" fill="var(--accent-purple)" style={{ display: 'inline' }} /> by Vidnexa Team
         </div>
       </div>
     </footer>

@@ -1,11 +1,11 @@
 function injectButton() {
-  if (document.getElementById('visnexa-download-btn')) return;
+  if (document.getElementById('vidnexa-download-btn')) return;
 
   const target = document.querySelector('#top-level-buttons-computed, ytd-menu-renderer');
   if (!target) return;
 
   const btn = document.createElement('button');
-  btn.id = 'visnexa-download-btn';
+  btn.id = 'vidnexa-download-btn';
   btn.innerHTML = `
     <span style="display: flex; align-items: center; gap: 6px; font-weight: 600; font-family: Roboto, Arial, sans-serif; font-size: 13px;">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -13,7 +13,7 @@ function injectButton() {
         <polyline points="7 10 12 15 17 10"></polyline>
         <line x1="12" y1="15" x2="12" y2="3"></line>
       </svg>
-      Visnexa Download
+      Vidnexa Download
     </span>
   `;
 

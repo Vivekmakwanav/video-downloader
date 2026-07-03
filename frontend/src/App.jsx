@@ -24,7 +24,7 @@ function Navbar() {
         <div style={{ background: 'linear-gradient(135deg, var(--accent-blue), var(--accent-purple))', padding: '8px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <DownloadCloud color="white" size={24} />
         </div>
-        <span className="text-gradient" style={{ fontSize: '1.5rem', fontWeight: '700', letterSpacing: '-0.5px' }}>VISNEXA</span>
+        <span className="text-gradient" style={{ fontSize: '1.5rem', fontWeight: '700', letterSpacing: '-0.5px' }}>VIDNEXA</span>
       </div>
       
       {/* Mobile Menu & Theme Toggle */}

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none" viewBox="0 0 48 48">
   <defs>
-    <linearGradient id="visnexa-grad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
+    <linearGradient id="vidnexa-grad" x1="0" y1="0" x2="48" y2="48" gradientUnits="userSpaceOnUse">
       <stop offset="0%" stop-color="#00f0ff" />
       <stop offset="100%" stop-color="#8a2be2" />
     </linearGradient>
@@ -9,7 +9,7 @@
       <feComposite in="SourceGraphic" in2="blur" operator="over" />
     </filter>
   </defs>
-  <circle cx="24" cy="24" r="22" stroke="url(#visnexa-grad)" stroke-width="2" fill="#0f0f15" />
-  <path d="M14 16 L22 34 Q24 38 26 34 L34 16" stroke="url(#visnexa-grad)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" fill="none" filter="url(#glow)" />
+  <circle cx="24" cy="24" r="22" stroke="url(#vidnexa-grad)" stroke-width="2" fill="#0f0f15" />
+  <path d="M14 16 L22 34 Q24 38 26 34 L34 16" stroke="url(#vidnexa-grad)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" fill="none" filter="url(#glow)" />
   <path d="M24 12 L24 24 M20 20 L24 24 L28 20" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none" />
 </svg>

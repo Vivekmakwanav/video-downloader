@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Visnexa Downloader Helper",
+  "name": "Vidnexa Downloader Helper",
   "version": "1.0",
-  "description": "Adds a quick download button directly below YouTube videos to archive them via Visnexa.",
+  "description": "Adds a quick download button directly below YouTube videos to archive them via Vidnexa.",
   "permissions": ["activeTab"],
   "content_scripts": [
     {
