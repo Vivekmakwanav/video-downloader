@@ -11,7 +11,8 @@ def analyze_video(url: str):
         'quiet': True,
         'no_warnings': True,
         'skip_download': True,
-        'extract_flat': False
+        'extract_flat': False,
+        'js_runtimes': {'node': {}}
     }
     
     cookies_path = os.path.join(os.path.dirname(__file__), "cookies.txt")
@@ -129,7 +130,8 @@ def download_video_sync(url: str, format_id: str, download_id: str, progress_hoo
         'merge_output_format': 'mp4',
         'quiet': True,
         'no_warnings': True,
-        'progress_hooks': progress_hooks
+        'progress_hooks': progress_hooks,
+        'js_runtimes': {'node': {}}
     }
     
     cookies_path = os.path.join(os.path.dirname(__file__), "cookies.txt")
@@ -169,7 +171,8 @@ def download_subtitles_sync(url: str, lang: str, is_auto: bool, download_id: str
         'outtmpl': file_path,
         'quiet': True,
         'no_warnings': True,
-        'convertsubtitles': 'srt'
+        'convertsubtitles': 'srt',
+        'js_runtimes': {'node': {}}
     }
     
     cookies_path = os.path.join(os.path.dirname(__file__), "cookies.txt")
