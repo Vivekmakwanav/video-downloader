@@ -15,7 +15,8 @@ def analyze_video(url: str):
         'remote_components': ['ejs:github'],
         'js_runtimes': {'node': {}},
         'username': 'oauth2',
-        'password': ''
+        'password': '',
+        'extractor_args': {'youtube': {'player_client': ['tv']}}
     }
     
     cookies_path = os.path.join(os.path.dirname(__file__), "cookies.txt")
@@ -137,7 +138,8 @@ def download_video_sync(url: str, format_id: str, download_id: str, progress_hoo
         'remote_components': ['ejs:github'],
         'js_runtimes': {'node': {}},
         'username': 'oauth2',
-        'password': ''
+        'password': '',
+        'extractor_args': {'youtube': {'player_client': ['tv']}}
     }
     
     cookies_path = os.path.join(os.path.dirname(__file__), "cookies.txt")
@@ -181,7 +183,8 @@ def download_subtitles_sync(url: str, lang: str, is_auto: bool, download_id: str
         'remote_components': ['ejs:github'],
         'js_runtimes': {'node': {}},
         'username': 'oauth2',
-        'password': ''
+        'password': '',
+        'extractor_args': {'youtube': {'player_client': ['tv']}}
     }
     
     cookies_path = os.path.join(os.path.dirname(__file__), "cookies.txt")
