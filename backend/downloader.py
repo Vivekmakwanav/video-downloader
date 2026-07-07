@@ -137,7 +137,9 @@ def download_video_sync(url: str, format_id: str, download_id: str, progress_hoo
         'remote_components': ['ejs:github'],
         'username': 'oauth2',
         'password': '',
-        'extractor_args': {'youtube': {'player_client': ['tv']}}
+        'extractor_args': {'youtube': {'player_client': ['tv']}},
+        'sleep_interval': 0,
+        'max_sleep_interval': 0
     }
     
     cookies_path = os.path.join(os.path.dirname(__file__), "cookies.txt")
