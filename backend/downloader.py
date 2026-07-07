@@ -139,7 +139,11 @@ def download_video_sync(url: str, format_id: str, download_id: str, progress_hoo
         'password': '',
         'extractor_args': {'youtube': {'player_client': ['tv']}},
         'sleep_interval': 0,
-        'max_sleep_interval': 0
+        'max_sleep_interval': 0,
+        'external_downloader': 'aria2c',
+        'external_downloader_args': {
+            'default': ['-x', '16', '-j', '16', '-s', '16', '-k', '1M']
+        }
     }
     
     cookies_path = os.path.join(os.path.dirname(__file__), "cookies.txt")
@@ -159,7 +163,7 @@ def download_video_sync(url: str, format_id: str, download_id: str, progress_hoo
             'end_time': end_time,
             'title': 'Trimmed Section'
         }]
-        ydl_opts['force_keyframes_at_cuts'] = True
+        ydl_opts['force_keyframes_at_cuts'] = False
 
     if progress_hooks:
         ydl_opts['progress_hooks'] = progress_hooks
