@@ -92,6 +92,32 @@ analyze_limiter = RateLimiter(limit=15, window=60)
 download_limiter = RateLimiter(limit=5, window=60)
 auth_limiter = RateLimiter(limit=10, window=60)
 
+# Concurrency Limiter: limit parallel downloads to avoid CPU/network starvation
+download_semaphore = asyncio.Semaphore(3)
+
+# Background Daemon Thread to clean up orphaned downloads (> 2 hours old)
+import threading
+from downloader import DOWNLOAD_DIR
+
+def cleanup_old_files():
+    while True:
+        try:
+            now = time.time()
+            if os.path.exists(DOWNLOAD_DIR):
+                for filename in os.listdir(DOWNLOAD_DIR):
+                    file_path = os.path.join(DOWNLOAD_DIR, filename)
+                    if os.path.isfile(file_path) and os.path.getmtime(file_path) < now - 7200:
+                        try:
+                            os.remove(file_path)
+                        except Exception:
+                            pass
+        except Exception:
+            pass
+        time.sleep(1800) # Run every 30 minutes
+        
+cleanup_thread = threading.Thread(target=cleanup_old_files, daemon=True)
+cleanup_thread.start()
+
 @app.get("/")
 def read_root():
     return {"status": "ok", "message": "Video Downloader API is running"}
@@ -260,29 +286,28 @@ async def download_task(url: str, format_id: str, download_id: str, client_id: s
                 pass
 
     try:
-        file_path = await asyncio.to_thread(
-            download_video_sync, 
-            url, 
-            format_id, 
-            download_id, 
-            progress_hooks=[progress_hook],
-            start_time=start_time,
-            end_time=end_time
-        )
-        
-        # Update database status to completed and save file_path
-        from database import SessionLocal
-        db = SessionLocal()
-        try:
-            db_download = db.query(models.DownloadHistory).filter(models.DownloadHistory.id == download_id).first()
-            if db_download:
-                db_download.status = "completed"
-                # Store relative or absolute file_path
-                db_download.url = file_path # Reuse URL or add a new column. Wait, url is the video URL. Let's add file_path column. Wait, models.DownloadHistory doesn't have file_path. We can just use the download_id to find the file since file_path is predictable, or add it to db.
-                # Actually, the file is in DOWNLOAD_DIR/{download_id}.ext.
-                db.commit()
-        finally:
-            db.close()
+        async with download_semaphore:
+            file_path = await asyncio.to_thread(
+                download_video_sync, 
+                url, 
+                format_id, 
+                download_id, 
+                progress_hooks=[progress_hook],
+                start_time=start_time,
+                end_time=end_time
+            )
+            
+            # Update database status to completed and save file_path
+            from database import SessionLocal
+            db = SessionLocal()
+            try:
+                db_download = db.query(models.DownloadHistory).filter(models.DownloadHistory.id == download_id).first()
+                if db_download:
+                    db_download.status = "completed"
+                    db_download.file_path = file_path
+                    db.commit()
+            finally:
+                db.close()
             
         # Send finished message to client EXACTLY ONCE
         message = json.dumps({
@@ -330,31 +355,30 @@ from downloader import DOWNLOAD_DIR
 def serve_file(download_id: str, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     if not download_id.isdigit():
         raise HTTPException(status_code=400, detail="Invalid download ID format")
-    # Find the file in DOWNLOAD_DIR that matches download_id exactly (without extension)
-    for filename in os.listdir(DOWNLOAD_DIR):
-        base, ext = os.path.splitext(filename)
-        if base == download_id:
-            file_path = os.path.join(DOWNLOAD_DIR, filename)
-            # Find original title to name the file properly
-            db_download = db.query(models.DownloadHistory).filter(models.DownloadHistory.id == download_id).first()
-            title = db_download.title if db_download else "video"
-            
-            # Clean title for filename
-            clean_title = "".join(c for c in title if c.isalnum() or c in (' ', '-', '_')).rstrip()
-            ext = os.path.splitext(filename)[1]
-            download_name = f"{clean_title}{ext}"
-            
-            # Delete file after serving it
-            def remove_file(path: str):
-                try:
-                    os.remove(path)
-                except Exception:
-                    pass
-            
-            background_tasks.add_task(remove_file, file_path)
-            return FileResponse(path=file_path, filename=download_name, media_type='application/octet-stream')
-            
-    raise HTTPException(status_code=404, detail="File not found")
+        
+    db_download = db.query(models.DownloadHistory).filter(models.DownloadHistory.id == int(download_id)).first()
+    if not db_download or not db_download.file_path:
+        raise HTTPException(status_code=404, detail="File path not found in history")
+        
+    file_path = db_download.file_path
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="File not found on disk")
+        
+    title = db_download.title or "video"
+    # Clean title for filename
+    clean_title = "".join(c for c in title if c.isalnum() or c in (' ', '-', '_')).rstrip()
+    ext = os.path.splitext(file_path)[1]
+    download_name = f"{clean_title}{ext}"
+    
+    # Delete file after serving it
+    def remove_file(path: str):
+        try:
+            os.remove(path)
+        except Exception:
+            pass
+    
+    background_tasks.add_task(remove_file, file_path)
+    return FileResponse(path=file_path, filename=download_name, media_type='application/octet-stream')
 
 
 @app.post("/api/download")
