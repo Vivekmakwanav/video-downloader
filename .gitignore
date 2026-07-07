@@ -5,3 +5,7 @@ node_modules/
 downloads/
 backend/test_download.mkv
 backend/test_yt_download.py
+*.db
+backend/sql_app.db
+cookies.txt
+backend/cookies.txt

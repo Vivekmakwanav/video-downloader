@@ -5,7 +5,7 @@ import { Download, Search, AlertCircle, Cloud, Play } from 'lucide-react-native'
 import axios from 'axios';
 import { Picker } from '@react-native-picker/picker';
 
-const API_URL = 'https://nexus-backend-z9ue.onrender.com';
+const API_URL = 'https://api.vidnexa.space';
 
 export default function App() {
   const [url, setUrl] = useState('');
@@ -60,7 +60,7 @@ export default function App() {
               <View style={styles.iconBox}>
                 <Cloud color="#fff" size={24} />
               </View>
-              <Text style={styles.logoText}>NEXUS</Text>
+              <Text style={styles.logoText}>VIDNEXA</Text>
             </View>
           </View>
 

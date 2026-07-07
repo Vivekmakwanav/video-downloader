@@ -16,8 +16,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the backend code
 COPY . .
 
-# Create the downloads directory
-RUN mkdir -p downloads
+# Create a non-root system user and configure permissions
+RUN useradd -u 8888 -m appuser && \
+    mkdir -p downloads && \
+    chown -R appuser:appuser /app
+
+# Switch to non-root user
+USER appuser
 
 # Run the FastAPI server
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

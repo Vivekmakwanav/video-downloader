@@ -4,7 +4,15 @@ from jose import jwt
 from passlib.context import CryptContext
 import os
 
-SECRET_KEY = os.getenv("SECRET_KEY", "super-secret-video-downloader-key") # In production, set this in environment variables
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+    if os.getenv("ENV") == "production":
+        raise RuntimeError("CRITICAL SECURITY ERROR: SECRET_KEY environment variable is required in production mode!")
+    else:
+        import sys
+        print("WARNING: SECRET_KEY is not set. Falling back to development default.", file=sys.stderr)
+        SECRET_KEY = "super-secret-video-downloader-key"
+
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7 # 1 week
 

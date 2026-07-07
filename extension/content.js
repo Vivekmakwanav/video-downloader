@@ -32,7 +32,7 @@ function injectButton() {
   
   btn.addEventListener('click', () => {
     const videoUrl = window.location.href;
-    window.open(`http://localhost:5173/?url=${encodeURIComponent(videoUrl)}`, '_blank');
+    window.open(`https://www.vidnexa.space/?url=${encodeURIComponent(videoUrl)}`, '_blank');
   });
 
   target.insertBefore(btn, target.firstChild);
