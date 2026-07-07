@@ -22,6 +22,23 @@ from auth import get_password_hash, verify_password, create_access_token, ACCESS
 from datetime import timedelta
 from jose import JWTError, jwt
 
+# Monkeypatch socket.getaddrinfo to prevent DNS Rebinding / SSRF globally at connection time
+_original_getaddrinfo = socket.getaddrinfo
+
+def _safe_getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
+    res = _original_getaddrinfo(host, port, family, type, proto, flags)
+    for fam, _, _, _, sockaddr in res:
+        ip = sockaddr[0]
+        try:
+            ip_obj = ipaddress.ip_address(ip)
+            if ip_obj.is_private or ip_obj.is_loopback or ip_obj.is_link_local:
+                raise socket.gaierror(f"SSRF Prevention: Connection to private subnet IP {ip} is blocked.")
+        except ValueError:
+            pass
+    return res
+
+socket.getaddrinfo = _safe_getaddrinfo
+
 # Create database tables
 Base.metadata.create_all(bind=engine)
 
