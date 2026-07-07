@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Search, Loader2, Video, Music, HardDrive, Clock, AlertCircle, CheckCircle, Play, Link, Sliders, Download, ChevronDown, ChevronUp, Scissors } from 'lucide-react';
 import { useDownload } from '../hooks/useDownload';
 
@@ -377,12 +378,49 @@ function VideoPreviewCard({ video, startDownload, downloads }) {
 }
 
 export default function Home() {
+  const location = useLocation();
+  const path = location.pathname;
+
   const [url, setUrl] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [videoData, setVideoData] = useState(null);
   const [error, setError] = useState('');
   const [openFaq, setOpenFaq] = useState(null);
   const [isBatchMode, setIsBatchMode] = useState(false);
+
+  let pageTitle = "Universal Video Downloader";
+  let pageSub = "Extract high-quality media from YouTube, Instagram, X, and more.";
+  let placeholderText = "Paste video URL here...";
+  let seoTitle = "Vidnexa - Universal Video Downloader (YouTube, Instagram, X)";
+  let seoDescription = "Download high-quality videos and audio from YouTube, Instagram, X (Twitter), and TikTok online for free. Fast online downloader with video trimming features.";
+
+  if (path === '/youtube-video-downloader') {
+    pageTitle = "YouTube Video Downloader";
+    pageSub = "Download and trim high-quality YouTube videos in MP4 or MP3 format.";
+    placeholderText = "Paste YouTube video link here...";
+    seoTitle = "YouTube Video Downloader - Download YouTube Videos Free | Vidnexa";
+    seoDescription = "Free online YouTube video downloader. Download and trim YouTube videos in 1080p, 720p, or MP3 audio format instantly with no limits.";
+  } else if (path === '/instagram-reel-downloader') {
+    pageTitle = "Instagram Reel Downloader";
+    pageSub = "Save Instagram reels, videos, and stories in high definition.";
+    placeholderText = "Paste Instagram link here...";
+    seoTitle = "Instagram Reel Downloader - Download Instagram Reels Free | Vidnexa";
+    seoDescription = "Free online Instagram downloader. Save Instagram reels, videos, and stories in high definition (HD) MP4 format instantly.";
+  } else if (path === '/twitter-video-downloader') {
+    pageTitle = "Twitter / X Video Downloader";
+    pageSub = "Download and clip videos directly from Twitter (X) tweets.";
+    placeholderText = "Paste Twitter/X link here...";
+    seoTitle = "Twitter (X) Video Downloader - Download X Videos Free | Vidnexa";
+    seoDescription = "Free online Twitter (X) video downloader. Save videos from X tweets in high quality MP4 format instantly.";
+  }
+
+  React.useEffect(() => {
+    document.title = seoTitle;
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) {
+      metaDesc.setAttribute('content', seoDescription);
+    }
+  }, [path, seoTitle, seoDescription]);
   
   const toggleFaq = (index) => {
     setOpenFaq(openFaq === index ? null : index);
@@ -461,10 +499,10 @@ export default function Home() {
       {/* Hero Section */}
       <div style={{ textAlign: 'center', width: '100%' }} className="animate-slide-up">
         <h1 className="hero-title">
-          Universal <span className="text-gradient">Video Downloader</span>
+          {pageTitle.split(' ').slice(0, -2).join(' ')} <span className="text-gradient">{pageTitle.split(' ').slice(-2).join(' ')}</span>
         </h1>
         <p className="hero-subtitle">
-          Extract high-quality media from YouTube, Instagram, X, and more.
+          {pageSub}
         </p>
 
         {/* Mode Selector */}
@@ -520,7 +558,7 @@ export default function Home() {
                 <input 
                   type="text" 
                   className="neon-input" 
-                  placeholder="Paste video URL here..." 
+                  placeholder={placeholderText} 
                   style={{ paddingLeft: '56px', width: '100%' }}
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}

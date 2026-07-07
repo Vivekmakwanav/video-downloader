@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Allow: /youtube-video-downloader
+Allow: /instagram-reel-downloader
+Allow: /twitter-video-downloader
+Allow: /about
+
+Sitemap: https://vidnexa.space/sitemap.xml

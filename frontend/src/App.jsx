@@ -100,6 +100,9 @@ function App() {
       <main style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/youtube-video-downloader" element={<Home />} />
+          <Route path="/instagram-reel-downloader" element={<Home />} />
+          <Route path="/twitter-video-downloader" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
