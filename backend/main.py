@@ -88,26 +88,60 @@ def is_safe_url(url: str) -> bool:
     except Exception:
         return False
 
-# IP Throttling / Rate Limiter Class
+# Hybrid Stateless/Stateful Rate Limiter Class
+import redis
+
 class RateLimiter:
-    def __init__(self, limit: int, window: int):
+    def __init__(self, limit: int, window: int, key_prefix: str):
         self.limit = limit
         self.window = window
-        self.requests = defaultdict(list)
+        self.key_prefix = key_prefix
+        self.local_requests = defaultdict(list)
+        self.redis_client = None
+        
+        # Try connecting to Redis if REDIS_URL is configured
+        redis_url = os.getenv("REDIS_URL")
+        if redis_url:
+            try:
+                self.redis_client = redis.Redis.from_url(redis_url, socket_timeout=1, socket_connect_timeout=1)
+                self.redis_client.ping()
+            except Exception:
+                import sys
+                print(f"WARNING: Failed to connect to Redis at {redis_url}. Rate limiter falling back to in-memory mode.", file=sys.stderr)
+                self.redis_client = None
         
     def is_allowed(self, ip: str) -> bool:
         now = time.time()
-        # Keep only timestamps in the current window
-        self.requests[ip] = [t for t in self.requests[ip] if now - t < self.window]
-        if len(self.requests[ip]) >= self.limit:
+        
+        # Try Redis Rate Limiting (stateless sliding window)
+        if self.redis_client:
+            try:
+                key = f"rate_limit:{self.key_prefix}:{ip}"
+                pipe = self.redis_client.pipeline()
+                pipe.zremrangebyscore(key, 0, now - self.window)
+                pipe.zcard(key)
+                pipe.zadd(key, {str(now): now})
+                pipe.expire(key, self.window)
+                _, count, _, _ = pipe.execute()
+                
+                if count >= self.limit:
+                    return False
+                return True
+            except Exception:
+                # Fallback to local in-memory on Redis error
+                pass
+                
+        # Local In-Memory Fallback
+        self.local_requests[ip] = [t for t in self.local_requests[ip] if now - t < self.window]
+        if len(self.local_requests[ip]) >= self.limit:
             return False
-        self.requests[ip].append(now)
+        self.local_requests[ip].append(now)
         return True
 
-# Initialize rate limiters (limit, window in seconds)
-analyze_limiter = RateLimiter(limit=15, window=60)
-download_limiter = RateLimiter(limit=5, window=60)
-auth_limiter = RateLimiter(limit=10, window=60)
+# Initialize rate limiters (limit, window in seconds, prefix)
+analyze_limiter = RateLimiter(limit=15, window=60, key_prefix="analyze")
+download_limiter = RateLimiter(limit=5, window=60, key_prefix="download")
+auth_limiter = RateLimiter(limit=10, window=60, key_prefix="auth")
 
 # Concurrency Limiter: limit parallel downloads to avoid CPU/network starvation
 download_semaphore = asyncio.Semaphore(3)
