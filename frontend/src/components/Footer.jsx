@@ -67,6 +67,16 @@ export default function Footer() {
           </ul>
         </div>
 
+        {/* Tools Column */}
+        <div className="footer-col">
+          <h4>Tools</h4>
+          <ul className="footer-links">
+            <li><Link to="/youtube-video-downloader">YouTube Downloader</Link></li>
+            <li><Link to="/instagram-reel-downloader">Instagram Downloader</Link></li>
+            <li><Link to="/twitter-video-downloader">Twitter/X Downloader</Link></li>
+          </ul>
+        </div>
+
         {/* Resources Column */}
         <div className="footer-col">
           <h4>Support</h4>
