@@ -540,43 +540,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* Chrome Extension Download Banner */}
-        <div className="glass-panel animate-slide-up" style={{ 
-          marginTop: '24px', 
-          padding: '16px 24px', 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'space-between', 
-          gap: '16px', 
-          background: 'rgba(0, 240, 255, 0.02)', 
-          border: '1px solid rgba(0, 240, 255, 0.1)',
-          borderRadius: '12px',
-          width: '100%',
-          flexWrap: 'wrap',
-          textAlign: 'left'
-        }}>
-          <div style={{ flex: '1 1 350px' }}>
-            <h4 style={{ margin: 0, fontWeight: '700', fontSize: '1rem', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Scissors size={16} color="var(--accent-blue)" /> Download Chrome Extension Helper
-            </h4>
-            <p style={{ margin: '4px 0 0 0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-              Add a quick "Download with Vidnexa" button directly below YouTube videos!
-            </p>
-          </div>
-          <a href="/vidnexa-extension.zip" download className="neon-button" style={{ 
-            fontSize: '0.85rem', 
-            padding: '8px 16px', 
-            borderRadius: '20px', 
-            display: 'inline-flex', 
-            alignItems: 'center', 
-            gap: '6px',
-            textDecoration: 'none',
-            color: '#000',
-            fontWeight: '600'
-          }}>
-            <Download size={14} /> Get Extension
-          </a>
-        </div>
       </div>
 
       {/* Video Preview Cards */}
