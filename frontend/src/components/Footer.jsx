@@ -50,21 +50,10 @@ export default function Footer() {
                 <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
               </svg>
             </a>
-            <a href="mailto:support@vidnexa.app" style={{ color: 'var(--text-secondary)', transition: 'color 0.2s', display: 'flex', alignItems: 'center' }} onMouseOver={e => e.currentTarget.style.color = 'var(--accent-blue)'} onMouseOut={e => e.currentTarget.style.color = 'var(--text-secondary)'} aria-label="Email">
+            <a href="mailto:support@vidnexa.space" style={{ color: 'var(--text-secondary)', transition: 'color 0.2s', display: 'flex', alignItems: 'center' }} onMouseOver={e => e.currentTarget.style.color = 'var(--accent-blue)'} onMouseOut={e => e.currentTarget.style.color = 'var(--text-secondary)'} aria-label="Email">
               <Mail size={20} />
             </a>
           </div>
-        </div>
-
-        {/* Product Column */}
-        <div className="footer-col">
-          <h4>Product</h4>
-          <ul className="footer-links">
-            <li><Link to="/">Downloader</Link></li>
-            <li><Link to="/about">Features</Link></li>
-            <li><a href="#how-it-works">How It Works</a></li>
-            <li><a href="#supported-platforms">Platforms</a></li>
-          </ul>
         </div>
 
         {/* Tools Column */}
@@ -73,18 +62,34 @@ export default function Footer() {
           <ul className="footer-links">
             <li><Link to="/youtube-video-downloader">YouTube Downloader</Link></li>
             <li><Link to="/instagram-reel-downloader">Instagram Downloader</Link></li>
+            <li><Link to="/facebook-video-downloader">Facebook Downloader</Link></li>
             <li><Link to="/twitter-video-downloader">Twitter/X Downloader</Link></li>
+            <li><Link to="/tiktok-video-downloader">TikTok Downloader</Link></li>
+            <li><Link to="/reddit-video-downloader">Reddit Downloader</Link></li>
           </ul>
         </div>
 
         {/* Resources Column */}
         <div className="footer-col">
-          <h4>Support</h4>
+          <h4>Resources</h4>
           <ul className="footer-links">
-            <li><Link to="/about">Technology</Link></li>
-            <li><a href="#faq">FAQ</a></li>
-            <li><a href="https://github.com" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>Documentation <ExternalLink size={12} /></a></li>
-            <li><a href="mailto:support@vidnexa.app">Contact Us</a></li>
+            <li><Link to="/blog">Blog Index</Link></li>
+            <li><Link to="/help">Help Center</Link></li>
+            <li><Link to="/api-documentation">Developer API</Link></li>
+            <li><Link to="/faq">Universal FAQs</Link></li>
+          </ul>
+        </div>
+
+        {/* Legal Column */}
+        <div className="footer-col">
+          <h4>Legal</h4>
+          <ul className="footer-links">
+            <li><Link to="/about">About Us</Link></li>
+            <li><Link to="/contact">Contact Support</Link></li>
+            <li><Link to="/privacy-policy">Privacy Policy</Link></li>
+            <li><Link to="/terms-of-service">Terms of Service</Link></li>
+            <li><Link to="/dmca-policy">DMCA Policy</Link></li>
+            <li><Link to="/cookie-policy">Cookie Policy</Link></li>
           </ul>
         </div>
 
@@ -130,7 +135,7 @@ export default function Footer() {
         </div>
         
         <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-          Made with <Heart size={14} color="var(--accent-purple)" fill="var(--accent-purple)" style={{ display: 'inline' }} /> by Vidnexa Team
+          Made with <Heart size={14} color="var(--accent-purple)" fill="var(--accent-purple)" style={{ display: 'inline' }} /> by Vidnexa SRE Team
         </div>
       </div>
     </footer>
