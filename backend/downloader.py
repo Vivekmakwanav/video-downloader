@@ -175,7 +175,11 @@ def download_video_sync(url: str, format_id: str, download_id: str, progress_hoo
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(url, download=True)
-        return ydl.prepare_filename(info)
+        filename = ydl.prepare_filename(info)
+        if format_id == 'bestaudio':
+            base_path, _ = os.path.splitext(filename)
+            filename = f"{base_path}.mp3"
+        return filename
 
 def download_subtitles_sync(url: str, lang: str, is_auto: bool, download_id: str):
     file_path = os.path.join(DOWNLOAD_DIR, f"{download_id}")
