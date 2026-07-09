@@ -125,7 +125,12 @@ def download_video_sync(url: str, format_id: str, download_id: str, progress_hoo
     file_path = os.path.join(DOWNLOAD_DIR, f"{download_id}.%(ext)s")
     
     # Determine the format string correctly depending on if it's audio only
-    download_format = 'bestaudio/best' if format_id == 'bestaudio' else f'{format_id}+bestaudio/best'
+    if format_id == 'bestaudio':
+        download_format = 'bestaudio/best'
+    elif '+' in format_id:
+        download_format = format_id
+    else:
+        download_format = f'{format_id}+bestaudio/best'
     
     ydl_opts = {
         'format': download_format,

@@ -314,6 +314,8 @@ class DownloadRequest(schemas.VideoAnalysisRequest):
 async def download_task(url: str, format_id: str, download_id: str, client_id: str, start_time: Optional[int] = None, end_time: Optional[int] = None):
     loop = asyncio.get_running_loop()
 
+    last_update = {'time': 0.0, 'percent': 0.0}
+
     def progress_hook(d):
         if d['status'] == 'downloading':
             try:
@@ -322,17 +324,24 @@ async def download_task(url: str, format_id: str, download_id: str, client_id: s
                 total = d.get('total_bytes') or d.get('total_bytes_estimate', 0)
                 if total > 0:
                     percent = (downloaded / total) * 100
-                    message = json.dumps({
-                        "download_id": download_id,
-                        "status": "downloading",
-                        "progress": round(percent, 2),
-                        "speed": d.get('speed', 0)
-                    })
-                    # Schedule the coroutine in the main event loop
-                    asyncio.run_coroutine_threadsafe(
-                        manager.send_personal_message(message, client_id),
-                        loop
-                    )
+                    now = time.time()
+                    
+                    # Only send progress updates if progress increases by >= 1% OR >= 0.5s elapsed
+                    if (percent - last_update['percent'] >= 1.0) or (now - last_update['time'] >= 0.5):
+                        last_update['percent'] = percent
+                        last_update['time'] = now
+                        
+                        message = json.dumps({
+                            "download_id": download_id,
+                            "status": "downloading",
+                            "progress": round(percent, 2),
+                            "speed": d.get('speed', 0)
+                        })
+                        # Schedule the coroutine in the main event loop
+                        asyncio.run_coroutine_threadsafe(
+                            manager.send_personal_message(message, client_id),
+                            loop
+                        )
             except Exception:
                 pass
 
