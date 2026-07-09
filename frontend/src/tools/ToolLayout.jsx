@@ -34,7 +34,7 @@ export default function ToolLayout({ tool }) {
     setVideoData(null);
     
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const API_URL = import.meta.env.VITE_API_URL || 'https://api.vidnexa.space';
       if (isBatch) {
         const urlsList = targetUrl.split('\n').map(u => u.trim()).filter(Boolean);
         if (urlsList.length === 0) {
@@ -77,7 +77,7 @@ export default function ToolLayout({ tool }) {
   const handleZipDownloads = async () => {
     setIsZipping(true);
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const API_URL = import.meta.env.VITE_API_URL || 'https://api.vidnexa.space';
       const response = await fetch(`${API_URL}/api/download/zip`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

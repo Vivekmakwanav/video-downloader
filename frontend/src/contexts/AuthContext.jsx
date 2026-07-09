@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }) => {
     formData.append('username', email);
     formData.append('password', password);
 
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    const API_URL = import.meta.env.VITE_API_URL || 'https://api.vidnexa.space';
     const response = await fetch(`${API_URL}/api/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (email, password) => {
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    const API_URL = import.meta.env.VITE_API_URL || 'https://api.vidnexa.space';
     const response = await fetch(`${API_URL}/api/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

@@ -7,7 +7,7 @@ export function useDownload() {
 
   useEffect(() => {
     // Connect to WebSocket
-    const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8000/ws';
+    const WS_URL = import.meta.env.VITE_WS_URL || 'wss://api.vidnexa.space/ws';
     ws.current = new WebSocket(`${WS_URL}/${clientId.current}`);
     
     ws.current.onmessage = (event) => {
@@ -26,7 +26,7 @@ export function useDownload() {
         if (data.status === 'finished') {
           // Trigger browser download
           const link = document.createElement('a');
-          const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+          const API_URL = import.meta.env.VITE_API_URL || 'https://api.vidnexa.space';
           link.href = `${API_URL}/api/file/${data.download_id}`;
           link.setAttribute('download', '');
           document.body.appendChild(link);
@@ -51,7 +51,7 @@ export function useDownload() {
         headers['Authorization'] = `Bearer ${token}`;
       }
 
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const API_URL = import.meta.env.VITE_API_URL || 'https://api.vidnexa.space';
       const response = await fetch(`${API_URL}/api/download`, {
         method: 'POST',
         headers: headers,
