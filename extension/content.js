@@ -1,9 +1,12 @@
 function addDownloadButton() {
   if (document.getElementById('vidnexa-btn')) return;
 
-  // Target YouTube's native action bar owner block
-  const actionMenu = document.querySelector('#top-row #actions #owner');
-  if (!actionMenu) return;
+  // Target YouTube's native channel owner layout block using fallbacks
+  const ownerSection = document.querySelector('#top-row #owner') || 
+                       document.querySelector('ytd-video-owner-renderer #owner') ||
+                       document.querySelector('#owner') ||
+                       document.querySelector('ytd-video-owner-renderer');
+  if (!ownerSection) return;
 
   const btn = document.createElement('button');
   btn.id = 'vidnexa-btn';
@@ -35,7 +38,7 @@ function addDownloadButton() {
     window.open(targetUrl, '_blank');
   });
 
-  actionMenu.appendChild(btn);
+  ownerSection.appendChild(btn);
 }
 
 // Poll periodically to adapt to YouTube client-side dynamic page transitions
