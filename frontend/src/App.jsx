@@ -182,12 +182,15 @@ function Navbar() {
   );
 }
 
-function App() {
+function AppContent() {
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const isEmbed = params.get('embed') === 'true';
+
   return (
-    <Router>
-      <ScrollToTop />
-      <Navbar />
-      <main style={{ padding: '40px 20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+    <>
+      {!isEmbed && <Navbar />}
+      <main style={{ padding: isEmbed ? '10px' : '40px 20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
         <Routes>
           {/* Universal & Platform Specific Downloader routes */}
           <Route path="/" element={<ToolLayout tool={toolsData.find(t => t.id === 'universal')} />} />
@@ -219,7 +222,16 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
       </main>
-      <Footer />
+      {!isEmbed && <Footer />}
+    </>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <ScrollToTop />
+      <AppContent />
     </Router>
   );
 }
