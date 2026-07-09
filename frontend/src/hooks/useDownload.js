@@ -86,5 +86,5 @@ export function useDownload() {
     }
   };
 
-  return { downloads, startDownload };
+  return { downloads, startDownload, clientId: clientId.current };
 }

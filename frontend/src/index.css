@@ -656,3 +656,38 @@ body {
     justify-content: center;
   }
 }
+
+/* Dual handle slider styling */
+.trim-slider-input {
+  pointer-events: none;
+  outline: none;
+}
+.trim-slider-input::-webkit-slider-thumb {
+  pointer-events: auto;
+  cursor: pointer;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--accent-blue);
+  box-shadow: 0 0 8px var(--accent-blue);
+  transition: transform 0.1s ease;
+}
+.trim-slider-input::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+.trim-slider-input::-moz-range-thumb {
+  pointer-events: auto;
+  cursor: pointer;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--accent-blue);
+  box-shadow: 0 0 8px var(--accent-blue);
+  transition: transform 0.1s ease;
+}
+.trim-slider-input::-moz-range-thumb:hover {
+  transform: scale(1.2);
+}

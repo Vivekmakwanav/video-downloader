@@ -219,3 +219,10 @@ def download_subtitles_sync(url: str, lang: str, is_auto: bool, download_id: str
                 return final_path
                 
         raise Exception("Subtitle download failed or files not found.")
+
+def convert_mp4_to_mp3_sync(input_path: str, output_path: str):
+    import subprocess
+    cmd = ["ffmpeg", "-y", "-i", input_path, "-vn", "-ar", "44100", "-ac", "2", "-b:a", "192k", output_path]
+    res = subprocess.run(cmd, capture_output=True, text=True)
+    if res.returncode != 0:
+        raise Exception(f"FFmpeg audio extraction failed: {res.stderr}")

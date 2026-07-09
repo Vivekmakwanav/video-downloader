@@ -1,12 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Video, Music, HardDrive, Clock, AlertCircle, CheckCircle, Play, Scissors, Download, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 
-export default function VideoPreviewCard({ video, startDownload, downloads }) {
+export default function VideoPreviewCard({ video, startDownload, downloads, clientId, onDownloadComplete }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [activeFormatDownloads, setActiveFormatDownloads] = useState({});
   const [trimStates, setTrimStates] = useState({});
   const [selectedSubtitle, setSelectedSubtitle] = useState('');
   const [isDownloadingSub, setIsDownloadingSub] = useState(false);
+  const [convertingState, setConvertingState] = useState({});
+  const notifiedDownloads = useRef(new Set());
 
   const formatDurationText = (seconds) => {
     if (!seconds) return '00:00';
@@ -48,7 +50,34 @@ export default function VideoPreviewCard({ video, startDownload, downloads }) {
     });
   };
 
+  useEffect(() => {
+    Object.entries(activeFormatDownloads).forEach(([formatId, downloadId]) => {
+      const state = downloads[downloadId];
+      if (state && state.status === 'finished') {
+        if (!notifiedDownloads.current.has(downloadId)) {
+          notifiedDownloads.current.add(downloadId);
+          
+          // Trigger browser notification if allowed
+          if ('Notification' in window && Notification.permission === 'granted') {
+            new Notification("Vidnexa Downloader", {
+              body: `Download complete: "${video.title.substring(0, 30)}..." is ready!`,
+              icon: '/favicon.svg'
+            });
+          }
+          
+          if (onDownloadComplete) {
+            onDownloadComplete(downloadId);
+          }
+        }
+      }
+    });
+  }, [downloads, activeFormatDownloads, video.title, onDownloadComplete]);
+
   const handleDownloadClick = async (formatId) => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+
     let startSec = null;
     let endSec = null;
     
@@ -116,6 +145,37 @@ export default function VideoPreviewCard({ video, startDownload, downloads }) {
       alert(err.message);
     } finally {
       setIsDownloadingSub(false);
+    }
+  };
+
+  const handleConvertToMp3 = async (formatId, downloadId) => {
+    setConvertingState(prev => ({ ...prev, [formatId]: 'converting' }));
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${API_URL}/api/convert-to-mp3`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          download_id: downloadId,
+          client_id: clientId
+        })
+      });
+      if (!response.ok) {
+        throw new Error('Failed to convert file to MP3');
+      }
+      const data = await response.json();
+      setConvertingState(prev => ({ ...prev, [formatId]: 'finished' }));
+      
+      // Auto-trigger browser save
+      const link = document.createElement('a');
+      link.href = `${API_URL}/api/file/${data.download_id}`;
+      link.setAttribute('download', '');
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+    } catch (err) {
+      setConvertingState(prev => ({ ...prev, [formatId]: 'error' }));
+      alert(err.message);
     }
   };
 
@@ -264,6 +324,17 @@ export default function VideoPreviewCard({ video, startDownload, downloads }) {
                         <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                           <HardDrive size={14} /> {formatSize(format.filesize)}
                         </span>
+                        {isFinished && format.format_id !== 'bestaudio' && (
+                          <button 
+                            className="neon-button" 
+                            style={{ padding: '8px 16px', fontSize: '0.9rem', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', background: 'rgba(168, 85, 247, 0.15)', border: '1px solid var(--accent-purple)' }}
+                            onClick={() => handleConvertToMp3(format.format_id, downloadId)}
+                            disabled={convertingState[format.format_id] === 'converting'}
+                          >
+                            {convertingState[format.format_id] === 'converting' ? <Loader2 className="animate-spin" size={16} /> : <Music size={16} />}
+                            {convertingState[format.format_id] === 'converting' ? 'Converting...' : 'Extract MP3'}
+                          </button>
+                        )}
                         <button 
                           className="neon-button" 
                           style={{ padding: '8px 16px', fontSize: '0.9rem', borderRadius: '8px', minWidth: '110px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
@@ -287,6 +358,96 @@ export default function VideoPreviewCard({ video, startDownload, downloads }) {
                         flexDirection: 'column',
                         gap: '12px'
                       }}>
+                        {/* Dual Range Trimming Slider */}
+                        {(() => {
+                          const startSec = parseTimeToSeconds(trimStates[format.format_id]?.start || '00:00') || 0;
+                          const endSec = parseTimeToSeconds(trimStates[format.format_id]?.end || '00:00') || video.duration || 100;
+                          const dur = video.duration || 100;
+                          return (
+                            <div style={{ padding: '0 8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                              <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Visual Crop Range Selector</span>
+                              <div style={{ position: 'relative', width: '100%', height: '32px' }}>
+                                <div style={{
+                                  position: 'absolute',
+                                  top: '13px',
+                                  left: 0,
+                                  right: 0,
+                                  height: '6px',
+                                  borderRadius: '3px',
+                                  background: 'rgba(255,255,255,0.08)',
+                                  zIndex: 1
+                                }} />
+                                <div style={{
+                                  position: 'absolute',
+                                  top: '13px',
+                                  left: `${(startSec / dur) * 100}%`,
+                                  width: `${((endSec - startSec) / dur) * 100}%`,
+                                  height: '6px',
+                                  borderRadius: '3px',
+                                  background: 'linear-gradient(90deg, var(--accent-blue), var(--accent-purple))',
+                                  zIndex: 2
+                                }} />
+                                <input
+                                  type="range"
+                                  min={0}
+                                  max={dur}
+                                  value={startSec}
+                                  onChange={(e) => {
+                                    const val = Math.min(Number(e.target.value), endSec - 1);
+                                    setTrimStates(prev => ({
+                                      ...prev,
+                                      [format.format_id]: {
+                                        ...prev[format.format_id],
+                                        start: formatDurationText(val)
+                                      }
+                                    }));
+                                  }}
+                                  style={{
+                                    position: 'absolute',
+                                    width: '100%',
+                                    top: '4px',
+                                    left: 0,
+                                    background: 'none',
+                                    pointerEvents: 'none',
+                                    WebkitAppearance: 'none',
+                                    margin: 0,
+                                    zIndex: 3
+                                  }}
+                                  className="trim-slider-input"
+                                />
+                                <input
+                                  type="range"
+                                  min={0}
+                                  max={dur}
+                                  value={endSec}
+                                  onChange={(e) => {
+                                    const val = Math.max(Number(e.target.value), startSec + 1);
+                                    setTrimStates(prev => ({
+                                      ...prev,
+                                      [format.format_id]: {
+                                        ...prev[format.format_id],
+                                        end: formatDurationText(val)
+                                      }
+                                    }));
+                                  }}
+                                  style={{
+                                    position: 'absolute',
+                                    width: '100%',
+                                    top: '4px',
+                                    left: 0,
+                                    background: 'none',
+                                    pointerEvents: 'none',
+                                    WebkitAppearance: 'none',
+                                    margin: 0,
+                                    zIndex: 4
+                                  }}
+                                  className="trim-slider-input"
+                                />
+                              </div>
+                            </div>
+                          );
+                        })()}
+
                         <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
                           <div style={{ flex: '1 1 120px' }}>
                             <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>Start Time (MM:SS)</label>

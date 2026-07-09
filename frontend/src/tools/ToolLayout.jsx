@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Loader2, AlertCircle, Link, Sliders, Download } from 'lucide-react';
+import { Search, Loader2, AlertCircle, Link, Sliders, Download, Archive } from 'lucide-react';
 import { useDownload } from '../hooks/useDownload';
 import SEO from '../components/SEO';
 import VideoPreviewCard from '../components/VideoPreviewCard';
@@ -12,8 +12,10 @@ export default function ToolLayout({ tool }) {
   const [videoData, setVideoData] = useState(null);
   const [error, setError] = useState('');
   const [isBatchMode, setIsBatchMode] = useState(false);
+  const [completedDownloadIds, setCompletedDownloadIds] = useState([]);
+  const [isZipping, setIsZipping] = useState(false);
 
-  const { downloads, startDownload } = useDownload();
+  const { downloads, startDownload, clientId } = useDownload();
 
   // Reset page state on tool change
   useEffect(() => {
@@ -21,6 +23,7 @@ export default function ToolLayout({ tool }) {
     setVideoData(null);
     setError('');
     setIsBatchMode(false);
+    setCompletedDownloadIds([]);
   }, [tool]);
 
   const triggerAnalyze = async (targetUrl, isBatch = false) => {
@@ -68,6 +71,37 @@ export default function ToolLayout({ tool }) {
       setError(err.message);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleZipDownloads = async () => {
+    setIsZipping(true);
+    try {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${API_URL}/api/download/zip`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ download_ids: completedDownloadIds })
+      });
+      if (!response.ok) {
+        throw new Error('Failed to bundle files into ZIP archive');
+      }
+      const data = await response.json();
+      
+      // Reset completed list
+      setCompletedDownloadIds([]);
+      
+      // Auto-trigger browser save for the zip file
+      const link = document.createElement('a');
+      link.href = `${API_URL}/api/file/${data.download_id}`;
+      link.setAttribute('download', '');
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setIsZipping(false);
     }
   };
 
@@ -187,6 +221,53 @@ export default function ToolLayout({ tool }) {
         )}
       </div>
 
+      {/* Batch ZIP download action banner */}
+      {completedDownloadIds.length > 0 && (
+        <div className="glass-panel animate-slide-up" style={{ 
+          padding: '20px 24px', 
+          width: '100%', 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          gap: '20px', 
+          border: '1px solid rgba(0, 240, 255, 0.2)',
+          boxShadow: '0 0 20px rgba(0, 240, 255, 0.05)',
+          background: 'rgba(0, 240, 255, 0.02)',
+          borderRadius: '16px',
+          flexWrap: 'wrap'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ padding: '12px', background: 'rgba(0, 240, 255, 0.1)', borderRadius: '12px', color: 'var(--accent-blue)' }}>
+              <Archive size={24} />
+            </div>
+            <div>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: '700', marginBottom: '4px' }}>Batch Download Bundle</h3>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                You have downloaded <strong>{completedDownloadIds.length}</strong> media file{completedDownloadIds.length > 1 ? 's' : ''}. Pack them together as a ZIP archive for a single click download!
+              </p>
+            </div>
+          </div>
+          <button 
+            className="neon-button" 
+            onClick={handleZipDownloads} 
+            disabled={isZipping}
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '8px', 
+              padding: '12px 24px', 
+              fontSize: '0.95rem',
+              borderRadius: '12px',
+              minWidth: '180px',
+              justifyContent: 'center'
+            }}
+          >
+            {isZipping ? <Loader2 className="animate-spin" size={18} /> : <Download size={18} />}
+            {isZipping ? 'Bundling ZIP...' : 'Download ZIP'}
+          </button>
+        </div>
+      )}
+
       {/* Video Preview Cards */}
       {videosList.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', width: '100%' }}>
@@ -196,6 +277,8 @@ export default function ToolLayout({ tool }) {
               video={video} 
               startDownload={startDownload} 
               downloads={downloads} 
+              clientId={clientId}
+              onDownloadComplete={(id) => setCompletedDownloadIds(prev => [...prev, id])}
             />
           ))}
         </div>

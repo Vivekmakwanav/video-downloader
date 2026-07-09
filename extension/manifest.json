@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "Vidnexa Video Downloader Helper",
+  "version": "1.0.0",
+  "description": "Adds a one-click download button directly to YouTube videos that routes into Vidnexa.",
+  "permissions": [
+    "activeTab"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["*://*.youtube.com/watch*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

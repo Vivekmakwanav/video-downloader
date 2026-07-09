@@ -16,7 +16,7 @@ from typing import Optional
 from database import engine, Base, get_db
 import models
 import schemas
-from downloader import analyze_video, download_video_sync, download_subtitles_sync
+from downloader import analyze_video, download_video_sync, download_subtitles_sync, convert_mp4_to_mp3_sync
 from socket_manager import manager
 from auth import get_password_hash, verify_password, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES, SECRET_KEY, ALGORITHM
 from datetime import timedelta
@@ -439,6 +439,115 @@ def serve_file(download_id: str, background_tasks: BackgroundTasks, db: Session 
     
     background_tasks.add_task(remove_file, file_path)
     return FileResponse(path=file_path, filename=download_name, media_type='application/octet-stream')
+
+@app.post("/api/convert-to-mp3")
+async def convert_to_mp3(request: Request, convert_req: schemas.ConvertRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    db_download = db.query(models.DownloadHistory).filter(models.DownloadHistory.id == convert_req.download_id).first()
+    if not db_download or not db_download.file_path:
+        raise HTTPException(status_code=404, detail="Source download history not found.")
+        
+    source_path = db_download.file_path
+    if not os.path.exists(source_path):
+        raise HTTPException(status_code=404, detail="Source video file not found on disk.")
+        
+    base_path, _ = os.path.splitext(source_path)
+    output_path = f"{base_path}.mp3"
+    
+    try:
+        await asyncio.to_thread(convert_mp4_to_mp3_sync, source_path, output_path)
+        
+        # Clean title: append " (Audio)" to make the filename clear
+        clean_title = db_download.title or "video"
+        if clean_title.endswith("..."):
+            clean_title = "Audio Download"
+            
+        new_download = models.DownloadHistory(
+            url=db_download.url,
+            title=f"{clean_title} (Audio)",
+            platform=db_download.platform,
+            format_id="bestaudio",
+            status="completed",
+            file_path=output_path,
+            owner_id=db_download.owner_id
+        )
+        db.add(new_download)
+        db.commit()
+        db.refresh(new_download)
+        
+        # Delete source video to optimize server disk space
+        def remove_file(path: str):
+            try:
+                os.remove(path)
+            except Exception:
+                pass
+        background_tasks.add_task(remove_file, source_path)
+        
+        return {"message": "Conversion completed", "download_id": new_download.id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/download/zip")
+async def download_zip(request: Request, zip_req: schemas.ZipRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    db_downloads = db.query(models.DownloadHistory).filter(models.DownloadHistory.id.in_(zip_req.download_ids)).all()
+    if not db_downloads:
+        raise HTTPException(status_code=404, detail="No matching downloads found.")
+        
+    import zipfile
+    
+    zip_id = str(uuid.uuid4().int)[:10]
+    zip_filename = f"batch_{zip_id}.zip"
+    zip_path = os.path.join(DOWNLOAD_DIR, zip_filename)
+    
+    files_added = 0
+    
+    try:
+        def create_zip_archive():
+            nonlocal files_added
+            with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+                for db_download in db_downloads:
+                    if db_download.file_path and os.path.exists(db_download.file_path):
+                        title = db_download.title or "video"
+                        clean_title = "".join(c for c in title if c.isalnum() or c in (' ', '-', '_')).rstrip()
+                        ext = os.path.splitext(db_download.file_path)[1]
+                        arcname = f"{clean_title}{ext}"
+                        zip_file.write(db_download.file_path, arcname=arcname)
+                        files_added += 1
+                        
+        await asyncio.to_thread(create_zip_archive)
+        
+        if files_added == 0:
+            if os.path.exists(zip_path):
+                os.remove(zip_path)
+            raise HTTPException(status_code=400, detail="No source files are currently available on server disk to bundle.")
+            
+        new_download = models.DownloadHistory(
+            url="batch://zip",
+            title=f"Batch Download ({files_added} files)",
+            platform="batch",
+            format_id="zip",
+            status="completed",
+            file_path=zip_path,
+            owner_id=None
+        )
+        db.add(new_download)
+        db.commit()
+        db.refresh(new_download)
+        
+        # Cleanup original files from server disk since they are now bundled in the ZIP
+        def remove_sources():
+            for db_download in db_downloads:
+                if db_download.file_path and os.path.exists(db_download.file_path):
+                    try:
+                        os.remove(db_download.file_path)
+                    except Exception:
+                        pass
+        background_tasks.add_task(remove_sources)
+        
+        return {"download_id": new_download.id}
+    except Exception as e:
+        if os.path.exists(zip_path):
+            os.remove(zip_path)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/api/download")

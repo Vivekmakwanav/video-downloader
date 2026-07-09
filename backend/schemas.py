@@ -67,3 +67,10 @@ class SubtitleDownloadRequest(BaseModel):
 
 class BatchAnalysisRequest(BaseModel):
     urls: List[str]
+
+class ConvertRequest(BaseModel):
+    download_id: int
+    client_id: str
+
+class ZipRequest(BaseModel):
+    download_ids: List[int]
