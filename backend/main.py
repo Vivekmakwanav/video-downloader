@@ -144,7 +144,7 @@ download_limiter = RateLimiter(limit=5, window=60, key_prefix="download")
 auth_limiter = RateLimiter(limit=10, window=60, key_prefix="auth")
 
 # Concurrency Limiter: limit parallel downloads to avoid CPU/network starvation
-download_semaphore = asyncio.Semaphore(3)
+download_semaphore = asyncio.Semaphore(2)
 
 # Background Daemon Thread to clean up orphaned downloads (> 2 hours old)
 import threading

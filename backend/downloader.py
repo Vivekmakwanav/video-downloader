@@ -147,7 +147,7 @@ def download_video_sync(url: str, format_id: str, download_id: str, progress_hoo
         'max_sleep_interval': 0,
         'external_downloader': 'aria2c',
         'external_downloader_args': {
-            'default': ['-x', '16', '-j', '16', '-s', '16', '-k', '1M']
+            'default': ['-x', '4', '-j', '4', '-s', '4', '-k', '1M']
         }
     }
     
