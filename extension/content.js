@@ -34,7 +34,7 @@ function addDownloadButton() {
 
   btn.addEventListener('click', () => {
     const videoUrl = window.location.href;
-    const targetUrl = `http://13.63.6.72/?url=${encodeURIComponent(videoUrl)}`;
+    const targetUrl = `https://vidnexa.space/?url=${encodeURIComponent(videoUrl)}`;
     window.open(targetUrl, '_blank');
   });
 
