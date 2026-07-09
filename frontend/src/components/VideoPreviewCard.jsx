@@ -118,7 +118,7 @@ export default function VideoPreviewCard({ video, startDownload, downloads, clie
 
     setIsDownloadingSub(true);
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'https://api.vidnexa.space';
+      const API_URL = 'https://api.vidnexa.space';
       const response = await fetch(`${API_URL}/api/subtitles/download`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -151,7 +151,7 @@ export default function VideoPreviewCard({ video, startDownload, downloads, clie
   const handleConvertToMp3 = async (formatId, downloadId) => {
     setConvertingState(prev => ({ ...prev, [formatId]: 'converting' }));
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'https://api.vidnexa.space';
+      const API_URL = 'https://api.vidnexa.space';
       const response = await fetch(`${API_URL}/api/convert-to-mp3`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
