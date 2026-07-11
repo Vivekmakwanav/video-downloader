@@ -1,8 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
-import { DownloadCloud, LayoutDashboard, User as UserIcon, LogOut, Info, Sun, Moon, Menu, X, ChevronDown } from 'lucide-react';
+import { DownloadCloud, Info, Sun, Moon, Menu, X, ChevronDown } from 'lucide-react';
 import React, { useContext, useState, useEffect } from 'react';
-import Dashboard from './pages/Dashboard';
-import Login from './pages/Login';
 import About from './pages/About';
 import Footer from './components/Footer';
 import SearchBox from './components/SearchBox';
@@ -141,11 +139,6 @@ function Navbar() {
           <Link to="/about" onClick={handleLinkClick} style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: '500', transition: 'color 0.2s' }} onMouseOver={(e) => e.target.style.color = 'var(--text-primary)'} onMouseOut={(e) => e.target.style.color = 'var(--text-secondary)'}>
             About
           </Link>
-          {user && (
-            <Link to="/dashboard" onClick={handleLinkClick} style={{ color: 'var(--text-secondary)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: '500', transition: 'color 0.2s' }} onMouseOver={(e) => e.target.style.color = 'var(--text-primary)'} onMouseOut={(e) => e.target.style.color = 'var(--text-secondary)'}>
-              <LayoutDashboard size={18} /> Dashboard
-            </Link>
-          )}
         </div>
         
         <div className="nav-actions">
@@ -164,18 +157,6 @@ function Navbar() {
             </button>
           </div>
 
-          {user ? (
-            <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }} className="nav-user-container">
-              <span className="nav-user-email" style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: '500' }}>{user.email}</span>
-              <button onClick={() => { logout(); handleLinkClick(); }} className="glass-panel" style={{ border: 'none', padding: '10px', color: '#ff6b6b', cursor: 'pointer', borderRadius: '50%', display: 'flex', alignItems: 'center', transition: 'background 0.2s' }} onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,107,107,0.1)'} onMouseOut={(e) => e.currentTarget.style.background = 'var(--glass-bg)'} title="Sign Out">
-                <LogOut size={18} />
-              </button>
-            </div>
-          ) : (
-            <Link to="/login" onClick={handleLinkClick} className="neon-button" style={{ padding: '8px 16px', fontSize: '0.9rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
-              <UserIcon size={16} /> Sign In
-            </Link>
-          )}
         </div>
       </div>
     </nav>
@@ -216,10 +197,6 @@ function AppContent() {
           {legalData.map(l => (
             <Route key={l.slug} path={`/${l.slug}`} element={<LegalLayout />} />
           ))}
-
-          {/* Auth & Dashboard */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
       </main>
       {!isEmbed && <Footer />}
