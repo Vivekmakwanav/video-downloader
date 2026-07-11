@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Loader2, AlertCircle, Link, Sliders, Download, Archive } from 'lucide-react';
+import { Search, Loader2, AlertCircle, Link, Sliders, Download, Archive, Puzzle } from 'lucide-react';
 import { useDownload } from '../hooks/useDownload';
 import SEO from '../components/SEO';
 import VideoPreviewCard from '../components/VideoPreviewCard';
@@ -340,6 +340,59 @@ export default function ToolLayout({ tool }) {
               <span style={{ fontSize: '1rem', color: 'var(--text-primary)', fontWeight: '500' }}>{feat}</span>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Chrome Extension Promo Banner */}
+      <div className="glass-panel animate-slide-up" style={{
+        width: '100%',
+        padding: '32px',
+        background: 'linear-gradient(135deg, rgba(0, 240, 255, 0.05), rgba(138, 43, 226, 0.05))',
+        border: '1px solid rgba(255, 255, 255, 0.08)',
+        borderRadius: '24px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        textAlign: 'center',
+        gap: '20px',
+        boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.2)'
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '56px',
+          height: '56px',
+          borderRadius: '50%',
+          background: 'linear-gradient(135deg, var(--accent-blue), var(--accent-purple))',
+          boxShadow: '0 0 20px rgba(0, 240, 255, 0.4)',
+          color: '#fff'
+        }}>
+          <Puzzle size={28} />
+        </div>
+        <div>
+          <h3 style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '8px' }}>
+            Get the <span className="text-gradient">Chrome Extension</span>
+          </h3>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', maxWidth: '600px', lineHeight: '1.6', margin: '0 auto' }}>
+            Download videos directly from YouTube with a single click! Install our Chrome Extension to add a glowing **Download** button right next to the YouTube channel subscribe bar.
+          </p>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+          <a href="/vidnexa-extension.zip" download className="neon-button" style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            textDecoration: 'none',
+            padding: '12px 28px',
+            fontSize: '1rem',
+            fontWeight: '600'
+          }}>
+            <Download size={18} /> Download Chrome Extension
+          </a>
+          <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
+            Unzip the folder & load as an unpacked extension in Developer Mode.
+          </span>
         </div>
       </div>
 

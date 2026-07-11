@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
-import { DownloadCloud, Info, Sun, Moon, Menu, X, ChevronDown } from 'lucide-react';
+import { DownloadCloud, Info, Sun, Moon, Menu, X, ChevronDown, Puzzle } from 'lucide-react';
 import React, { useContext, useState, useEffect } from 'react';
 import About from './pages/About';
 import Footer from './components/Footer';
@@ -139,6 +139,9 @@ function Navbar() {
           <Link to="/about" onClick={handleLinkClick} style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: '500', transition: 'color 0.2s' }} onMouseOver={(e) => e.target.style.color = 'var(--text-primary)'} onMouseOut={(e) => e.target.style.color = 'var(--text-secondary)'}>
             About
           </Link>
+          <a href="/vidnexa-extension.zip" download style={{ color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: '500', transition: 'color 0.2s', display: 'flex', alignItems: 'center', gap: '6px' }} onMouseOver={(e) => e.currentTarget.style.color = 'var(--text-primary)'} onMouseOut={(e) => e.currentTarget.style.color = 'var(--text-secondary)'}>
+            <Puzzle size={16} /> Extension
+          </a>
         </div>
         
         <div className="nav-actions">
