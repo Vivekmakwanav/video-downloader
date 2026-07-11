@@ -2,15 +2,26 @@ import yt_dlp
 import os
 import uuid
 import asyncio
+import urllib.parse
+
+def clean_youtube_url(url: str) -> str:
+    if "youtube.com/watch" in url or "youtu.be/" in url:
+        parsed = urllib.parse.urlparse(url)
+        query = urllib.parse.parse_qs(parsed.query)
+        if "v" in query:
+            return f"https://www.youtube.com/watch?v={query['v'][0]}"
+    return url
 
 DOWNLOAD_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "downloads")
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
 def analyze_video(url: str):
+    url = clean_youtube_url(url)
     ydl_opts = {
         'quiet': True,
         'no_warnings': True,
         'skip_download': True,
+        'noplaylist': True,
         'extract_flat': False,
         'remote_components': ['ejs:github'],
         'username': 'oauth2',
@@ -122,6 +133,7 @@ def analyze_video(url: str):
             raise Exception(f"Failed to analyze video: {str(e)}")
 
 def download_video_sync(url: str, format_id: str, download_id: str, progress_hooks=None, start_time: int = None, end_time: int = None):
+    url = clean_youtube_url(url)
     file_path = os.path.join(DOWNLOAD_DIR, f"{download_id}.%(ext)s")
     
     # Determine the format string correctly depending on if it's audio only
@@ -138,6 +150,7 @@ def download_video_sync(url: str, format_id: str, download_id: str, progress_hoo
         'merge_output_format': 'mp4',
         'quiet': True,
         'no_warnings': True,
+        'noplaylist': True,
         'progress_hooks': progress_hooks,
         'remote_components': ['ejs:github'],
         'username': 'oauth2',
@@ -182,6 +195,7 @@ def download_video_sync(url: str, format_id: str, download_id: str, progress_hoo
         return filename
 
 def download_subtitles_sync(url: str, lang: str, is_auto: bool, download_id: str):
+    url = clean_youtube_url(url)
     file_path = os.path.join(DOWNLOAD_DIR, f"{download_id}")
     
     ydl_opts = {
@@ -192,6 +206,7 @@ def download_subtitles_sync(url: str, lang: str, is_auto: bool, download_id: str
         'outtmpl': file_path,
         'quiet': True,
         'no_warnings': True,
+        'noplaylist': True,
         'convertsubtitles': 'srt',
         'remote_components': ['ejs:github'],
         'username': 'oauth2',
