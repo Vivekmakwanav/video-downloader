@@ -25,16 +25,28 @@ def parse_single_entry(info):
     
     formats = []
     
-    # Check if this entry is an image (no formats, but has a direct url)
+    # Check if this entry is a direct video/image stream (no formats list)
     if not info.get('formats') and info.get('url'):
-        formats.append({
-            'format_id': 'direct_image',
-            'ext': 'jpg',
-            'resolution': 'Image',
-            'filesize': 0,
-            'format_note': 'High Quality Image',
-            'direct_url': info.get('url')
-        })
+        url_lower = info.get('url', '').lower()
+        is_video = duration > 0 or any(ext in url_lower for ext in ['.mp4', '.m3u8', 'video'])
+        if is_video:
+            formats.append({
+                'format_id': 'direct_video',
+                'ext': 'mp4',
+                'resolution': 'Video',
+                'filesize': 0,
+                'format_note': 'High Quality Video',
+                'direct_url': info.get('url')
+            })
+        else:
+            formats.append({
+                'format_id': 'direct_image',
+                'ext': 'jpg',
+                'resolution': 'Image',
+                'filesize': 0,
+                'format_note': 'High Quality Image',
+                'direct_url': info.get('url')
+            })
     else:
         # Video formats processing
         audio_formats = [f for f in info.get('formats', []) if f.get('vcodec') == 'none' and f.get('ext') in ['m4a', 'webm']]
@@ -42,7 +54,7 @@ def parse_single_entry(info):
         
         seen_resolutions = set()
         video_formats = sorted(
-            [f for f in info.get('formats', []) if f.get('vcodec') != 'none'],
+            [f for f in info.get('formats', []) if f.get('vcodec') != 'none' or (f.get('height') or 0) > 0 or (f.get('width') or 0) > 0],
             key=lambda x: x.get('height', 0) or 0,
             reverse=True
         )
@@ -144,9 +156,10 @@ def analyze_video(url: str):
             raise Exception(f"Failed to analyze video: {str(e)}")
 
 def download_video_sync(url: str, format_id: str, download_id: str, progress_hooks=None, start_time: int = None, end_time: int = None):
-    # If it is a direct image URL, download using python request immediately
-    if format_id == 'direct_image':
-        file_path = os.path.join(DOWNLOAD_DIR, f"{download_id}.jpg")
+    # If it is a direct image or direct video URL, download using python request immediately
+    if format_id in ['direct_image', 'direct_video']:
+        ext = 'mp4' if format_id == 'direct_video' else 'jpg'
+        file_path = os.path.join(DOWNLOAD_DIR, f"{download_id}.{ext}")
         req = urllib.request.Request(
             url, 
             headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'}
@@ -165,7 +178,7 @@ def download_video_sync(url: str, format_id: str, download_id: str, progress_hoo
                         hook({'status': 'finished'})
                     except Exception:
                         pass
-        return f"{download_id}.jpg"
+        return f"{download_id}.{ext}"
 
     # Otherwise, download using yt-dlp
     url = clean_youtube_url(url)

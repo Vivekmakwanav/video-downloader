@@ -104,8 +104,8 @@ export default function VideoPreviewCard({ video, startDownload, downloads, clie
       }
     }
 
-    const targetUrl = formatId === 'direct_image' 
-      ? video.formats.find(f => f.format_id === 'direct_image')?.direct_url || video.url 
+    const targetUrl = (formatId === 'direct_image' || formatId === 'direct_video')
+      ? video.formats.find(f => f.format_id === formatId)?.direct_url || video.url 
       : video.url;
     const downloadId = await startDownload(targetUrl, formatId, startSec, endSec);
     if (downloadId) {
