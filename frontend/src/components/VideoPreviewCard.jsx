@@ -104,7 +104,10 @@ export default function VideoPreviewCard({ video, startDownload, downloads, clie
       }
     }
 
-    const downloadId = await startDownload(video.url, formatId, startSec, endSec);
+    const targetUrl = formatId === 'direct_image' 
+      ? video.formats.find(f => f.format_id === 'direct_image')?.direct_url || video.url 
+      : video.url;
+    const downloadId = await startDownload(targetUrl, formatId, startSec, endSec);
     if (downloadId) {
       setActiveFormatDownloads(prev => ({ ...prev, [formatId]: downloadId }));
     }
@@ -314,26 +317,28 @@ export default function VideoPreviewCard({ video, startDownload, downloads, clie
                       </div>
                       
                       <div className="format-item-right" style={{ gap: '12px', flexWrap: 'wrap' }}>
-                        <button
-                          onClick={() => toggleTrim(format.format_id)}
-                          style={{
-                            background: trimStates[format.format_id]?.active ? 'rgba(0, 240, 255, 0.1)' : 'transparent',
-                            border: '1px solid rgba(255,255,255,0.1)',
-                            borderRadius: '8px',
-                            padding: '6px 10px',
-                            fontSize: '0.8rem',
-                            color: trimStates[format.format_id]?.active ? 'var(--accent-blue)' : 'var(--text-secondary)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s'
-                          }}
-                          disabled={isPending || isDownloading || isFinished}
-                        >
-                          <Scissors size={14} />
-                          {trimStates[format.format_id]?.active ? 'Cancel' : 'Trim'}
-                        </button>
+                        {format.format_id !== 'direct_image' && (
+                          <button
+                            onClick={() => toggleTrim(format.format_id)}
+                            style={{
+                              background: trimStates[format.format_id]?.active ? 'rgba(0, 240, 255, 0.1)' : 'transparent',
+                              border: '1px solid rgba(255, 255, 255, 0.1)',
+                              borderRadius: '8px',
+                              padding: '6px 10px',
+                              fontSize: '0.8rem',
+                              color: trimStates[format.format_id]?.active ? 'var(--accent-blue)' : 'var(--text-secondary)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s'
+                            }}
+                            disabled={isPending || isDownloading || isFinished}
+                          >
+                            <Scissors size={14} />
+                            {trimStates[format.format_id]?.active ? 'Cancel' : 'Trim'}
+                          </button>
+                        )}
                         <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                           <HardDrive size={14} /> {formatSize(format.filesize)}
                         </span>

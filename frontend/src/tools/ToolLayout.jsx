@@ -120,7 +120,7 @@ export default function ToolLayout({ tool }) {
     }
   }, []);
 
-  const videosList = videoData ? (Array.isArray(videoData) ? videoData : [videoData]) : [];
+  const videosList = videoData ? (videoData.is_carousel ? videoData.entries : (Array.isArray(videoData) ? videoData : [videoData])) : [];
   const breadcrumbs = [
     { name: 'Home', url: '/' },
     { name: tool.name, url: tool.path }

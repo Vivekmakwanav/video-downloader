@@ -3,6 +3,7 @@ import os
 import uuid
 import asyncio
 import urllib.parse
+import urllib.request
 
 def clean_youtube_url(url: str) -> str:
     if "youtube.com/watch" in url or "youtu.be/" in url:
@@ -15,13 +16,93 @@ def clean_youtube_url(url: str) -> str:
 DOWNLOAD_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "downloads")
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
+def parse_single_entry(info):
+    title = info.get('title', 'Unknown Title')
+    thumbnail = info.get('thumbnail', '')
+    duration = int(round(info.get('duration') or 0))
+    extractor = info.get('extractor_key', 'Unknown')
+    video_id = info.get('id', '')
+    
+    formats = []
+    
+    # Check if this entry is an image (no formats, but has a direct url)
+    if not info.get('formats') and info.get('url'):
+        formats.append({
+            'format_id': 'direct_image',
+            'ext': 'jpg',
+            'resolution': 'Image',
+            'filesize': 0,
+            'format_note': 'High Quality Image',
+            'direct_url': info.get('url')
+        })
+    else:
+        # Video formats processing
+        audio_formats = [f for f in info.get('formats', []) if f.get('vcodec') == 'none' and f.get('ext') in ['m4a', 'webm']]
+        best_audio = audio_formats[-1] if audio_formats else None
+        
+        seen_resolutions = set()
+        video_formats = sorted(
+            [f for f in info.get('formats', []) if f.get('vcodec') != 'none'],
+            key=lambda x: x.get('height', 0) or 0,
+            reverse=True
+        )
+        
+        for f in video_formats:
+            w = f.get('width') or 0
+            h = f.get('height') or 0
+            resolution_val = min(w, h) if w and h else h
+            
+            res_label = f"{resolution_val}p" if resolution_val else "Video"
+            if res_label != "Video" and res_label in seen_resolutions:
+                continue
+            seen_resolutions.add(res_label)
+            
+            format_id = f.get('format_id')
+            filesize = f.get('filesize') or f.get('filesize_approx') or 0
+            
+            if f.get('acodec') == 'none' and best_audio:
+                format_id = f"{format_id}+{best_audio['format_id']}"
+                audio_size = best_audio.get('filesize') or best_audio.get('filesize_approx') or 0
+                filesize = filesize + audio_size
+            
+            formats.append({
+                'format_id': format_id,
+                'ext': f.get('ext', 'mp4'),
+                'resolution': res_label,
+                'filesize': filesize,
+                'format_note': f.get('format_note', 'HD' if (resolution_val or 0) >= 720 else 'SD')
+            })
+            
+        if best_audio:
+            formats.append({
+                'format_id': 'bestaudio',
+                'ext': 'mp3',
+                'resolution': 'Audio Only',
+                'filesize': best_audio.get('filesize') or best_audio.get('filesize_approx') or 0,
+                'format_note': 'High Quality Audio'
+            })
+
+    return {
+        'url': info.get('webpage_url') or info.get('url') or '',
+        'title': title,
+        'thumbnail': thumbnail,
+        'duration': duration,
+        'platform': extractor,
+        'video_id': video_id,
+        'formats': formats,
+        'subtitles': []
+    }
+
 def analyze_video(url: str):
-    url = clean_youtube_url(url)
+    # Only scrub YouTube URL queries
+    if "youtube.com" in url or "youtu.be" in url:
+        url = clean_youtube_url(url)
+        
     ydl_opts = {
         'quiet': True,
         'no_warnings': True,
         'skip_download': True,
-        'noplaylist': True,
+        'noplaylist': True if ("youtube.com" in url or "youtu.be" in url) else False,
         'extract_flat': False,
         'remote_components': ['ejs:github'],
         'username': 'oauth2',
@@ -32,107 +113,61 @@ def analyze_video(url: str):
     cookies_path = os.path.join(os.path.dirname(__file__), "cookies.txt")
     if os.path.exists(cookies_path):
         ydl_opts['cookiefile'] = cookies_path
+        
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         try:
             info = ydl.extract_info(url, download=False)
             
-            # Extract basic info
-            title = info.get('title', 'Unknown Title')
-            thumbnail = info.get('thumbnail', '')
-            duration = int(round(info.get('duration') or 0))
-            extractor = info.get('extractor_key', 'Unknown')
-            video_id = info.get('id', '')
+            # Check if this is an Instagram carousel post / playlist
+            if 'entries' in info and not ("youtube.com" in url or "youtu.be" in url):
+                entries = list(info['entries'])
+                if entries:
+                    carousel_entries = []
+                    for entry in entries:
+                        if not entry:
+                            continue
+                        try:
+                            entry_data = parse_single_entry(entry)
+                            carousel_entries.append(entry_data)
+                        except Exception:
+                            continue
+                    
+                    return {
+                        'is_carousel': True,
+                        'title': info.get('title', 'Instagram Post'),
+                        'platform': info.get('extractor_key', 'Instagram'),
+                        'entries': carousel_entries
+                    }
             
-            # Extract available formats
-            audio_formats = [f for f in info.get('formats', []) if f.get('vcodec') == 'none' and f.get('ext') in ['m4a', 'webm']]
-            best_audio = audio_formats[-1] if audio_formats else None
-            
-            formats = []
-            seen_resolutions = set()
-            
-            # Sort formats by height to get highest quality first
-            video_formats = sorted(
-                [f for f in info.get('formats', []) if f.get('vcodec') != 'none'],
-                key=lambda x: x.get('height', 0) or 0,
-                reverse=True
-            )
-            
-            for f in video_formats:
-                w = f.get('width') or 0
-                h = f.get('height') or 0
-                # Use the smaller dimension to determine standard resolution (e.g. 1080p, 720p)
-                # This ensures support for both horizontal and vertical/portrait (shorts/reels) video formats.
-                resolution_val = min(w, h) if w and h else h
-                
-                if not resolution_val or resolution_val not in [2160, 1440, 1080, 720, 480, 360]:
-                    continue
-                
-                res_label = f"{resolution_val}p"
-                if res_label in seen_resolutions:
-                    continue
-                seen_resolutions.add(res_label)
-                
-                format_id = f.get('format_id')
-                filesize = f.get('filesize') or f.get('filesize_approx') or 0
-                
-                # If no audio in this format, combine with best audio
-                if f.get('acodec') == 'none' and best_audio:
-                    format_id = f"{format_id}+{best_audio['format_id']}"
-                    audio_size = best_audio.get('filesize') or best_audio.get('filesize_approx') or 0
-                    filesize = filesize + audio_size
-                
-                formats.append({
-                    'format_id': format_id,
-                    'ext': 'mp4',
-                    'resolution': res_label,
-                    'filesize': filesize,
-                    'format_note': f.get('format_note', 'HD' if resolution_val >= 720 else 'SD')
-                })
-                
-            # Add audio only option
-            if best_audio:
-                formats.append({
-                    'format_id': 'bestaudio',
-                    'ext': 'mp3',
-                    'resolution': 'Audio Only',
-                    'filesize': best_audio.get('filesize') or best_audio.get('filesize_approx') or 0,
-                    'format_note': 'High Quality Audio'
-                })
-            
-            # Extract subtitles list
-            subtitles_list = []
-            raw_subs = info.get('subtitles', {}) or {}
-            raw_auto = info.get('automatic_captions', {}) or {}
-            
-            for lang, val in raw_subs.items():
-                if val:
-                    subtitles_list.append({
-                        'lang': lang,
-                        'name': val[0].get('name', lang),
-                        'is_auto': False
-                    })
-            for lang, val in raw_auto.items():
-                if val:
-                    subtitles_list.append({
-                        'lang': lang,
-                        'name': val[0].get('name', lang),
-                        'is_auto': True
-                    })
-
-            return {
-                'url': url,
-                'title': title,
-                'thumbnail': thumbnail,
-                'duration': duration,
-                'platform': extractor,
-                'video_id': video_id,
-                'formats': formats,
-                'subtitles': subtitles_list
-            }
+            return parse_single_entry(info)
         except yt_dlp.utils.DownloadError as e:
             raise Exception(f"Failed to analyze video: {str(e)}")
 
 def download_video_sync(url: str, format_id: str, download_id: str, progress_hooks=None, start_time: int = None, end_time: int = None):
+    # If it is a direct image URL, download using python request immediately
+    if format_id == 'direct_image':
+        file_path = os.path.join(DOWNLOAD_DIR, f"{download_id}.jpg")
+        req = urllib.request.Request(
+            url, 
+            headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'}
+        )
+        with urllib.request.urlopen(req) as response, open(file_path, 'wb') as out_file:
+            if progress_hooks:
+                for hook in progress_hooks:
+                    try:
+                        hook({'status': 'downloading', 'downloaded_bytes': 100, 'total_bytes': 100})
+                    except Exception:
+                        pass
+            out_file.write(response.read())
+            if progress_hooks:
+                for hook in progress_hooks:
+                    try:
+                        hook({'status': 'finished'})
+                    except Exception:
+                        pass
+        return f"{download_id}.jpg"
+
+    # Otherwise, download using yt-dlp
     url = clean_youtube_url(url)
     file_path = os.path.join(DOWNLOAD_DIR, f"{download_id}.%(ext)s")
     
