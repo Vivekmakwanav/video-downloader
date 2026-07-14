@@ -74,6 +74,19 @@ export default function VideoPreviewCard({ video, startDownload, downloads, clie
   }, [downloads, activeFormatDownloads, video.title, onDownloadComplete]);
 
   const handleDownloadClick = async (formatId) => {
+    const existingDownloadId = activeFormatDownloads[formatId];
+    const downloadState = existingDownloadId ? downloads[existingDownloadId] : null;
+    if (downloadState && downloadState.status === 'finished') {
+      const link = document.createElement('a');
+      const API_URL = 'https://api.vidnexa.space';
+      link.href = `${API_URL}/api/file/${existingDownloadId}`;
+      link.setAttribute('download', '');
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+      return;
+    }
+
     if ('Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission();
     }
@@ -339,9 +352,9 @@ export default function VideoPreviewCard({ video, startDownload, downloads, clie
                           className="neon-button" 
                           style={{ padding: '8px 16px', fontSize: '0.9rem', borderRadius: '8px', minWidth: '110px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
                           onClick={() => handleDownloadClick(format.format_id)}
-                          disabled={isPending || isDownloading || isFinished}
+                          disabled={isPending || isDownloading}
                         >
-                          {isFinished ? 'Complete' : isDownloading ? `${progress.toFixed(0)}%` : isPending ? <Loader2 className="animate-spin" size={16} /> : 'Download'}
+                          {isDownloading ? `${progress.toFixed(0)}%` : isPending ? <Loader2 className="animate-spin" size={16} /> : 'Download'}
                         </button>
                       </div>
                     </div>
