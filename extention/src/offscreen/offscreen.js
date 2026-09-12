@@ -103,7 +103,10 @@ function parseM3U8(content, playlistUrl) {
 async function downloadHls(playlistUrl, filename, videoId, settings) {
   try {
     // 1. Fetch playlist content
-    const resp = await fetch(playlistUrl, { referrerPolicy: "no-referrer" });
+    const resp = await fetch(playlistUrl);
+    if (!resp.ok) {
+      throw new Error(`HTTP ${resp.status} ${resp.statusText || 'Forbidden'}`);
+    }
     const text = await resp.text();
     
     let parsed = parseM3U8(text, playlistUrl);
@@ -127,7 +130,10 @@ async function downloadHls(playlistUrl, filename, videoId, settings) {
           }
         }
 
-        const varResp = await fetch(selectedVariant.url, { referrerPolicy: "no-referrer" });
+        const varResp = await fetch(selectedVariant.url);
+        if (!varResp.ok) {
+          throw new Error(`HTTP ${varResp.status} ${varResp.statusText || 'Forbidden'}`);
+        }
         const varText = await varResp.text();
         parsed = parseM3U8(varText, selectedVariant.url);
       } else {
@@ -189,7 +195,7 @@ async function downloadHls(playlistUrl, filename, videoId, settings) {
         while (attempts < 3 && !success && !abortController.signal.aborted) {
           attempts++;
           try {
-            const segResp = await fetch(segment.url, { signal: abortController.signal, referrerPolicy: "no-referrer" });
+            const segResp = await fetch(segment.url, { signal: abortController.signal });
             if (!segResp.ok) throw new Error(`HTTP ${segResp.status}`);
             buffer = await segResp.arrayBuffer();
             success = true;

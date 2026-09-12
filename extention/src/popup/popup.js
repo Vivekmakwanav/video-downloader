@@ -295,6 +295,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 <span>${sizeText}</span>
               `}
             </div>
+            ${isFailed ? `
+              <div style="color: #ef4444; font-size: 11px; margin-top: 6px; font-weight: 500;">
+                ${download.error || 'Stream fetch blocked by site security.'}
+              </div>
+              <button class="btn-cloud-fallback" style="margin-top: 8px; width: 100%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; padding: 7px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                Download via Vidnexa Cloud Engine
+              </button>
+            ` : ""}
           `;
 
           // Handle cancel
@@ -304,6 +313,17 @@ document.addEventListener("DOMContentLoaded", () => {
               chrome.runtime.sendMessage({
                 action: "cancel-hls-download",
                 videoId: download.id
+              });
+            });
+          }
+
+          // Handle cloud fallback button
+          const cloudBtn = card.querySelector(".btn-cloud-fallback");
+          if (cloudBtn) {
+            cloudBtn.addEventListener("click", () => {
+              chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                const targetUrl = (tabs && tabs[0] && tabs[0].url) ? tabs[0].url : "";
+                chrome.tabs.create({ url: `https://vidnexa.space/?url=${encodeURIComponent(targetUrl)}` });
               });
             });
           }
