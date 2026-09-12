@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo-area">
+        <svg class="logo-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        <span class="app-title">Universal Video Downloader <span class="badge-pro">PRO</span></span>
+      </div>
+      <button id="btn-options" title="Open Settings" class="icon-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
+    </header>
+
+    <!-- Nav Tabs -->
+    <div class="tabs-nav">
+      <button id="tab-detected" class="tab-link active">
+        Detected Videos <span id="count-detected" class="count-bubble">0</span>
+      </button>
+      <button id="tab-downloads" class="tab-link">
+        Downloads <span id="count-downloads" class="count-bubble">0</span>
+      </button>
+    </div>
+
+    <!-- Main Views -->
+    <main class="app-main">
+      <!-- Detected Videos List -->
+      <section id="view-detected" class="tab-view active">
+        <div id="empty-state" class="empty-state">
+          <div class="empty-icon-container">
+            <svg class="radar-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
+              <path d="M12 6a6 6 0 0 1 6 6"></path>
+              <path d="M12 10a2 2 0 0 1 2 2"></path>
+            </svg>
+          </div>
+          <h3>Scanning Network Streams...</h3>
+          <p>Play a video on the page to trigger detection.</p>
+        </div>
+        
+        <div id="video-list-container" class="video-list scrollable hidden">
+          <!-- Populated programmatically -->
+        </div>
+      </section>
+
+      <!-- Downloads Tracker List -->
+      <section id="view-downloads" class="tab-view">
+        <div id="empty-downloads" class="empty-state">
+          <div class="empty-icon-container">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+          </div>
+          <h3>No Active Downloads</h3>
+          <p>Initiated HLS segment stitching or standard downloads will show here.</p>
+        </div>
+
+        <div id="downloads-list-container" class="downloads-list scrollable hidden">
+          <!-- Populated programmatically -->
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer Batch Actions (Shown only when videos exist in Detected View) -->
+    <footer id="app-footer" class="app-footer hidden">
+      <div class="footer-left">
+        <label class="checkbox-container">
+          <input type="checkbox" id="chk-select-all">
+          <span class="checkmark"></span>
+          <span class="label-text">Select All</span>
+        </label>
+      </div>
+      <button id="btn-batch-download" class="btn btn-primary disabled">
+        Download Selected
+      </button>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

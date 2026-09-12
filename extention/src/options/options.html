@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Settings - Universal Video Downloader Pro</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="settings-container">
+    <header class="settings-header">
+      <div class="logo-area">
+        <svg class="logo-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+        <h1>Universal Video Downloader <span class="badge-pro">PRO</span></h1>
+      </div>
+      <p class="subtitle">Customize extension defaults, streaming qualities, and file operations.</p>
+    </header>
+
+    <main class="settings-main">
+      <!-- General Card -->
+      <section class="settings-card">
+        <h2>General Preferences</h2>
+        
+        <div class="setting-row">
+          <div class="setting-info">
+            <label for="showFloatingButton" class="setting-label">Floating Download Button</label>
+            <span class="setting-desc">Display a small download button overlay in the top-right corner of detected videos on hover.</span>
+          </div>
+          <div class="setting-control">
+            <label class="switch">
+              <input type="checkbox" id="showFloatingButton" checked>
+              <span class="slider round"></span>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- Downloads Card -->
+      <section class="settings-card">
+        <h2>Download Configuration</h2>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <label for="qualityPreference" class="setting-label">Preferred Quality</label>
+            <span class="setting-desc">The default quality target when parsing adaptive video streams (YouTube, HLS master playlists, etc.).</span>
+          </div>
+          <div class="setting-control">
+            <select id="qualityPreference" class="form-select">
+              <option value="highest">Highest Available</option>
+              <option value="1080p">1080p Full HD</option>
+              <option value="720p">720p HD</option>
+              <option value="480p">480p SD</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <label for="formatPreference" class="setting-label">Preferred Format</label>
+            <span class="setting-desc">Favored file format output if multiple types are detected.</span>
+          </div>
+          <div class="setting-control">
+            <select id="formatPreference" class="form-select">
+              <option value="mp4">MP4 Video (Recommended)</option>
+              <option value="webm">WebM Video</option>
+              <option value="mkv">MKV Container</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="setting-row">
+          <div class="setting-info">
+            <label for="concurrentLimit" class="setting-label">HLS Concurrency Limit</label>
+            <span class="setting-desc">Maximum active segment downloads running simultaneously (higher is faster, but raises rate-limiting risks).</span>
+          </div>
+          <div class="setting-control">
+            <div class="slider-val-container">
+              <input type="range" id="concurrentLimit" min="1" max="10" value="5" class="form-range">
+              <span id="concurrentLimitVal" class="range-val-bubble">5</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Advanced Card -->
+      <section class="settings-card">
+        <h2>File Operations & Naming</h2>
+
+        <div class="setting-row vertical">
+          <div class="setting-info">
+            <label for="namingPattern" class="setting-label">File Naming Template</label>
+            <span class="setting-desc">Set dynamic naming conventions. Placeholders are substituted during download:</span>
+            <div class="tags-explanation">
+              <span class="placeholder-tag" title="Insert page or video title">{title}</span>
+              <span class="placeholder-tag" title="Insert media quality">{quality}</span>
+              <span class="placeholder-tag" title="Insert media extension format">{format}</span>
+            </div>
+          </div>
+          <div class="setting-control wide">
+            <input type="text" id="namingPattern" class="form-input" value="{title}">
+            <div id="namingPreview" class="preview-text">Preview: video_title_example.mp4</div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Save Status Toast -->
+    <div id="toast" class="toast">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+      Settings Auto-Saved
+    </div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>
