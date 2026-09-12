@@ -164,7 +164,21 @@ chrome.webRequest.onHeadersReceived.addListener(
 
     const lowerUrl = url.toLowerCase();
 
-    if (contentType.includes("video/mp4") || /\.mp4($|\?)/i.test(lowerUrl) || lowerUrl.includes(".mp4")) {
+    if (contentType.includes("application/x-mpegurl") || 
+        contentType.includes("application/vnd.apple.mpegurl") || 
+        contentType.includes("audio/mpegurl") || 
+        /\.m3u8($|\?)/i.test(lowerUrl) || 
+        lowerUrl.includes(".m3u8") ||
+        lowerUrl.includes("/playlist.m3u8") ||
+        lowerUrl.includes("/master.m3u8")) {
+      isVideo = true;
+      type = "hls";
+      extension = "mp4";
+    } else if (contentType.includes("application/dash+xml") || /\.mpd($|\?)/i.test(lowerUrl) || lowerUrl.includes(".mpd")) {
+      isVideo = true;
+      type = "dash";
+      extension = "mp4";
+    } else if (contentType.includes("video/mp4") || /\.mp4($|\?)/i.test(lowerUrl) || lowerUrl.includes(".mp4")) {
       isVideo = true;
       type = "mp4";
       extension = "mp4";
@@ -172,37 +186,35 @@ chrome.webRequest.onHeadersReceived.addListener(
       isVideo = true;
       type = "webm";
       extension = "webm";
-    } else if (contentType.includes("application/x-mpegurl") || contentType.includes("application/vnd.apple.mpegurl") || contentType.includes("audio/mpegurl") || /\.m3u8($|\?)/i.test(lowerUrl) || lowerUrl.includes(".m3u8")) {
-      isVideo = true;
-      type = "hls";
-      extension = "ts";
-    } else if (contentType.includes("application/dash+xml") || /\.mpd($|\?)/i.test(lowerUrl) || lowerUrl.includes(".mpd")) {
-      isVideo = true;
-      type = "dash";
-      extension = "mp4";
-    } else if (contentType.startsWith("video/") || contentType.startsWith("audio/")) {
+    } else if ((contentType.startsWith("video/") || contentType.startsWith("audio/")) && 
+               !contentType.includes("mp2t") && 
+               !contentType.includes("mpegurl")) {
       isVideo = true;
       type = contentType.split("/")[1] || "media";
       extension = type.includes("mpeg") ? "mp3" : type.includes("mp4") ? "mp4" : type;
-    } else if (contentType.includes("octet-stream") && (lowerUrl.includes("video") || lowerUrl.includes("stream") || lowerUrl.includes("media"))) {
+    } else if (contentType.includes("octet-stream") && (lowerUrl.includes("video") || lowerUrl.includes("stream")) && !lowerUrl.includes("segment") && !lowerUrl.includes("chunk")) {
       isVideo = true;
       type = "mp4";
       extension = "mp4";
     }
 
-    // Filter out tiny header responses (< 1 KB) for non-playlist files to eliminate 151-byte metadata files
-    if (type !== "hls" && type !== "dash" && contentLength > 0 && contentLength < 1024) {
-      return;
+    // Explicitly reject HLS/DASH chunk segments (ts, mp2t, m4s, range, etc.)
+    if (contentType === "video/mp2t" || 
+        contentType.includes("mp2t") ||
+        (lowerUrl.includes(".ts") && !lowerUrl.includes(".m3u8")) || 
+        lowerUrl.includes(".m4s") || 
+        lowerUrl.includes(".mp4/range/") ||
+        lowerUrl.includes("range=") ||
+        lowerUrl.includes("bytes=") ||
+        lowerUrl.includes("/segment") ||
+        lowerUrl.includes("/frag/") ||
+        lowerUrl.includes("/chunk")) {
+      isVideo = false;
     }
 
-
-
-    // Ignore chunked segments to avoid cluttering the detected list
-    if ((url.includes(".ts") && !url.includes(".m3u8") && type !== "hls") || 
-        url.includes(".m4s") || 
-        url.includes(".mp4/range/") ||
-        url.includes("range=")) {
-      isVideo = false;
+    // Filter out tiny header responses (< 1 KB) for non-playlist files to eliminate metadata files
+    if (type !== "hls" && type !== "dash" && contentLength > 0 && contentLength < 1024) {
+      return;
     }
 
     if (isVideo) {

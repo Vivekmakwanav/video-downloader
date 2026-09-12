@@ -162,6 +162,48 @@
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
   }
 
+  function scrapeHlsPlayers() {
+    try {
+      const streams = [];
+      const title = document.title || "Video Stream";
+
+      // Inspect global hls objects or active players
+      if (window.hls && window.hls.url) {
+        streams.push({
+          url: window.hls.url,
+          filename: title,
+          type: "hls",
+          extension: "mp4",
+          quality: "HLS Stream (Auto HD)",
+          size: 0,
+          sizeFormatted: "HLS Stream",
+          source: "HLS Player Scraper"
+        });
+      }
+
+      // Check video elements for blob: or .m3u8 sources
+      const videos = document.querySelectorAll("video");
+      videos.forEach(v => {
+        if (v.src && v.src.includes(".m3u8")) {
+          streams.push({
+            url: v.src,
+            filename: title,
+            type: "hls",
+            extension: "mp4",
+            quality: "HLS Stream (Auto HD)",
+            size: 0,
+            sizeFormatted: "HLS Stream",
+            source: "Page Video Scraper"
+          });
+        }
+      });
+
+      return streams;
+    } catch (e) {
+      return [];
+    }
+  }
+
   // Scrape periodically and send findings to content script
   function runScraper() {
     const findings = [];
@@ -174,6 +216,11 @@
     const vimeoStreams = scrapeVimeo();
     if (vimeoStreams && vimeoStreams.length > 0) {
       findings.push(...vimeoStreams);
+    }
+
+    const hlsStreams = scrapeHlsPlayers();
+    if (hlsStreams && hlsStreams.length > 0) {
+      findings.push(...hlsStreams);
     }
 
     if (findings.length > 0) {
